@@ -1,0 +1,15 @@
+
+/*# sourceMappingURL=custom.min.css.map */
+@charset "UTF-8";
+
+@font-face {
+  font-family: 'Preeti';
+  src: url('../fonts/Preeti.ttf') format('truetype'),
+       url('../fonts/Preeti.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.nepali{font-family: 'Preeti';}
+.table .badge{margin-top:5px;}

@@ -1,0 +1,38 @@
+.img-list {
+    position: relative;
+    display: inline-block;
+}
+.delete_image {
+    cursor: pointer;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 100;
+    background-color: #d0e5f5;
+    padding: 2px 4px;
+    color: #000;
+    opacity: 1;
+    font-weight: bolder;
+    line-height: 10px;
+    font-size: 17px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+}
+.close {
+    float: right;
+    font-size: 1.3125rem;
+    font-weight: 700;
+    line-height: .7;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
+}
+.select2-container .select2-selection--multiple .select2-selection__choice {
+    background-color: #405189 !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 3px !important;
+    padding: 3px !important;
+    margin-top: 6px !important;
+}

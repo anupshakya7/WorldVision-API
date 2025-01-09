@@ -1,0 +1,353 @@
+@charset "utf-8";
+/* CSS Document */
+html {
+  scroll-behavior: smooth;
+}
+/* width */
+::-webkit-scrollbar {
+ width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+ box-shadow: inset 0 0 5px grey;
+ border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+ background: #007abb;
+ border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+ background: #000;
+}
+body {
+  background: #f4f2f2;
+  font-family: 'Roboto', sans-serif;
+  display: swap;
+  font-size: 16px;
+  color: #4e4e4e;
+  position: relative;
+}
+p {
+  line-height: 1.5;
+  padding: 10px 0;
+  margin: 0;
+  text-align: justify;
+}
+.fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-bottom: 1px solid #000;
+  background: #fff;
+  padding: 10px 0;
+}
+.sticky {
+  z-index: 3;
+}
+.clear-both {
+  clear: both
+}
+/*start hover-effect*/
+a {
+  color: #3c3c3c;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+/*end hover-effect*/
+
+/**start color css**/
+.blue,.blue a {
+  color: #007abb;
+}
+.white {
+  color: #fff;
+}
+.black {
+  color: #000
+}
+.blue-bg{
+  background: #0960c1;
+}
+.gray{
+  color: #969da3;
+}
+/**end color css**/
+/**start font size**/
+.font-size14{font-size: 14px;}
+.font-size18{font-size: 18px;}
+.font-size20{font-size: 20px;}
+.font-size25{font-size: 25px;}
+.font-size30{font-size: 30px;}
+.font-size35{font-size: 35px;}
+.font-size40{font-size: 40px;}
+.font-size45{font-size: 45px;}
+.padding-top-20{padding-top: 20px;}
+/**end font size**/
+/**start padding**/
+.padding-bottom30{
+  padding-bottom: 30px;
+}
+/****start top menu****/
+header{
+  padding: 10px 0;
+}
+
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 11;
+  top: 8%;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 10px;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 0;
+  text-decoration: none;
+  color: #fff;
+  display: block;
+  transition: 0.3s;
+  margin-left: 32px;
+}
+.sidenav a.menu-link{
+  border-bottom: 1px solid #434343;
+  padding: 20px 0;
+  white-space: nowrap;
+} 
+.sidenav a em {
+  display: inline-block;
+  margin-left:  5px;
+  font-size: 12px;
+  transition:  transform 0.3s ease;
+  float: right;
+  margin-right: 37px;
+}
+.sidenav a:hover {
+  color: #a09c9c;
+}
+.sidenav a.active + .dropdownMenu {
+  max-height:  1000px;
+  opacity: 1;
+  transform:  translateX(0);
+  transition:  all 0.5s ease;
+}
+.sidenav a.active em {
+  transform:  rotate(180deg);
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+.dropdownMenu{
+    max-height:  0;
+    padding: 0;
+    overflow:  hidden;
+    border-bottom: 1px solid #434343;
+    margin-left: 32px;
+    list-style: none;
+    opacity: 0;
+    transform:  translateX(-10%);
+    transition:  all 0.3s 0.2s ease;
+}
+.dropdownMenu>li>a{
+  color: #fff;
+  padding: 10px 0;
+}
+.dropdownMenu>li>a:hover{
+  color: #818181;
+  background: transparent;
+  
+}
+.dropdownMenu>li{
+  position: relative;
+}
+.dropdownMenu>li:before{
+  position: absolute;
+    content: "";
+    background: #fff;
+    height: 2px;
+    width: 5px;
+    top: 50%;
+    left: 18px;
+}
+header .logo img{
+  margin: auto;
+  height: 46px;
+  width: 165px;
+}
+.header-icons{
+  display: flex;
+  justify-content: end;
+  margin-top: 11px;
+}
+.header-icons a{
+  padding: 10px;
+}
+.header-icons i {
+    font-size: 20px;
+}
+.searchModal .modal-content{
+  background: #000;
+}
+.searchModal .modal-content form{
+  background: #141414;
+    padding: 10px;
+    border-radius: 13px;
+}
+.searchModal .modal-content form button,.searchModal .modal-content form input{
+  background: transparent;
+  border: 0;
+  color:#fff;
+  box-shadow: 0 0 0;
+}
+.searchModal .modal-content form input{
+  width: 87%;
+}
+.searchModal .modal-content form input:focus{
+  outline-style: none;
+}
+.searchModal .modal-content form .closes{
+  background: #000;
+  border-radius: 50%;
+  float: right;
+      text-shadow: 0 0 black;
+    margin-top: -3px;
+}
+/***end top menu***/
+
+/****start new css for top cart**/
+.cart-wrap-design{
+  border-top: 4px solid #007ABB;
+  position: absolute;
+  right: 0;
+  top: 40px;
+  width: 350px;
+  z-index: 100;
+  display: none;
+  background: #fff;
+  padding: 20px 0 0;
+}
+
+.mini-cart-container label{
+  margin-right:6px;
+}
+
+.product-name {
+    color: #000;
+    font-size: 14px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+.card-total-price{
+  justify-content: end;
+  margin-top:6px;
+}
+.cart-wrap-design .col-md-4{
+  position: relative;
+}
+.cart-wrap-design .cart-img{
+  width: 75px;
+  height: 75px;
+}
+
+.remove-item {
+    background: #111;
+    border-radius: 50%;
+    color: #fff;
+    /* left: 0; */
+    padding: 0;
+    position: absolute;
+    top: -9px;
+    height: 22px;
+    width: 22px;
+    text-align: center;
+}
+
+.remove-item i{
+  font-size: 14px;
+}
+
+.mini-cart-container {
+    font-size: 13px;
+    height: 100%;
+    max-height: 200px;
+    overflow-y: scroll;
+    padding: 10px 15px 0 20px;
+    width: 100%;
+    font-weight: bold;
+    }
+.subtotal-cart-footer{
+  padding: 20px 0;
+  font-weight: bold;
+  border: 1px solid #ddd;
+}
+.subtotal-cart-footer a{
+  padding: 6px 0;
+}
+
+/****end new css for top cart**/
+
+/****start slideshow***/
+.carousel-caption {
+    text-align: left;
+    top: 9%;
+    text-shadow: none;
+    width: 100%;
+    left: 0;
+}
+.carousel-caption .container{
+  display: flex;
+  align-items: center;
+}
+.content-title {
+  font-size: 35px;
+  color: #000;
+  width: 100%;
+  left: 0;
+}
+.slider-img{
+  margin: auto;
+}
+.carousel-control {
+  display: flex;
+  align-items: center;
+  width: auto;
+}
+.carousel .left .left-arrow {
+  left: 0;
+}
+.carousel .right .right-arrow {
+  right: 0;
+}
+.carousel .right .right-arrow, .carousel .left .left-arrow {
+  top: 40%;
+  position: absolute;
+}
+.line-height-half{
+  line-height: 1.5;
+}
+/***end slideshow***/

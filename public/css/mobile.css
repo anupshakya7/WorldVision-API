@@ -1,0 +1,20 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+ @media only screen and (max-width:967px) {
+  
+}
+ @media only screen and (max-width:760px) {
+
+
+/****menu****/
+nav .nav-menu ul li{float: none;}
+}
+ @media only screen and (max-width:567px) {
+  
+}
+ @media only screen and (max-width:396px) {
+  
+
+}
