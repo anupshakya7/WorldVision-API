@@ -23,6 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 //World Vision
+//Parent Data -> Country Data
+Route::get('parent-data',[APIAllAPIController::class,'parentData']);
+
 //Map Postman -> Test API
 Route::get('/map-data',[APIAllAPIController::class,'mapData']);
 
