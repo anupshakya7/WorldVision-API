@@ -35,6 +35,17 @@ Route::get('/indicator-score',[APIAllAPIController::class,'indicatorScore']);
 //Country and Sub Country Score For Table -> CountryList
 Route::get('/country-subcountry-score',[APIAllAPIController::class,'countryScore']);
 
+//Train Graph -> Train Graph Optimize
+Route::get('/train-graph',[APIAllAPIController::class,'trainGraph']);
+
+
+
+//Summary API
+Route::get('/summary',[APIAllAPIController::class,'summary']);
+
+//Download Data
+Route::get('/download-data',[APIAllAPIController::class,'downloadData']);
+
 //ATI API
 //Check Voice of People
 Route::get('/check-voice-people',[VoiceOfPeopleController::class,'checkCountryYearWise'])->name('check.voice.people');
