@@ -323,7 +323,7 @@ class AllAPIController extends Controller
 		]);	
      }
 
-     //Train Graph
+     //Train Graph -> Incomplete
      public function trainGraph(Request $request){
           $validator = Validator::make($request->all(),[
 			'region_id'=>'nullable|integer',
@@ -525,7 +525,3 @@ class AllAPIController extends Controller
           ]);
      }
 }
-
-]
-
-
