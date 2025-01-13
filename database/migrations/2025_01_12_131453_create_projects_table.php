@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('region_id');
             $table->string('countrycode');
             $table->string('geocode');
+            $table->decimal('latitude',10,6);
+            $table->decimal('longitude',10,6);
             $table->string('project_title');
             $table->text('project_overview');
             $table->string('link');

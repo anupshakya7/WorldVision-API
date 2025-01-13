@@ -8,6 +8,7 @@ use App\Http\Controllers\WorldVision\Admin\CountryDataController;
 use App\Http\Controllers\WorldVision\Admin\IndexController;
 use App\Http\Controllers\WorldVision\Admin\SourceController;
 use App\Http\Controllers\WorldVision\Admin\IndicatorController;
+use App\Http\Controllers\WorldVision\Admin\ProjectController;
 use App\Http\Controllers\WorldVision\Admin\SubCountryController;
 use App\Http\Controllers\WorldVision\Admin\SubCountryDataController;
 use App\Http\Controllers\WorldVision\Admin\UserController;
@@ -77,4 +78,7 @@ Route::middleware(['auth','check_company'])->group(function () {
 
     //Source
     Route::resource('source',SourceController::class);
+
+    //Project
+    Route::resource('project',ProjectController::class);
 });

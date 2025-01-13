@@ -3,6 +3,7 @@
 use App\Http\Controllers\ATI\Admin\CountryData\VoiceOfPeopleController;
 use App\Http\Controllers\ATI\API\AllAPIController;
 use App\Http\Controllers\ATI\API\MapAPIController;
+use App\Http\Controllers\WorldVision\Admin\ProjectController;
 use App\Http\Controllers\WorldVision\API\AllAPIController as APIAllAPIController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 //World Vision
+//Get Country and SubCountry
+Route::get('/get-country-sub-country',[ProjectController::class,'filterCountrySubCountry'])->name('getCountrySubCountry');
+
+//Get Indicator
+Route::get('/get-indicator',[ProjectController::class,'filterIndicator'])->name('getIndicator');
+
 //Parent Data -> Country Data
 Route::get('parent-data',[APIAllAPIController::class,'parentData']);
 
@@ -37,8 +44,6 @@ Route::get('/country-subcountry-score',[APIAllAPIController::class,'countryScore
 
 //Train Graph -> Train Graph Optimize
 Route::get('/train-graph',[APIAllAPIController::class,'trainGraph']);
-
-
 
 //Summary API
 Route::get('/summary',[APIAllAPIController::class,'summary']);
