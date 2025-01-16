@@ -238,6 +238,25 @@
                     </div>
                 </li> --}}
 
+                {{-- Start Project Management --}}
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarProject" data-bs-toggle="collapse" role="button"
+                        aria-expanded="false" aria-controls="sidebarProject">
+                        <i class="ri-magic-fill"></i>
+                        <span data-key="t-country">{{ 'Project' }}</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarProject">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{{route('admin.project.index')}}" class="nav-link">{{ 'List' }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{route('admin.project.create')}}" class="nav-link">{{ 'Create' }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {{-- End Project Management --}}
             </ul>
         </div>
         <!-- Sidebar -->

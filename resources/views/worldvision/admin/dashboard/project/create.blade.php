@@ -187,7 +187,6 @@
                                                     @endif
                                                 </div>
                                             </div>
-
                                             <div class="col-12" style="margin-top:20px;">
                                                 <label for="latitude">Latitude<span
                                                     style="color:red;">*</span></label>
@@ -199,7 +198,6 @@
                                                 </em>
                                                 @endif
                                             </div>
-
                                             <div class="col-12" style="margin-top:20px;">
                                                 <label for="longitude">Longitude<span
                                                     style="color:red;">*</span></label>
@@ -211,12 +209,33 @@
                                                 </em>
                                                 @endif
                                             </div>
+                                            <div class="col-12">
+                                                @php
+                                                    $currentYear = Carbon\Carbon::now()->year-1;
+                                                @endphp
+                                                <div class="form-group" style="margin-top:20px;">
+                                                    <label for="year">{{ 'Year' }} <span
+                                                            style="color:red;">*</span></label>
+                                                    <select class="form-control form-select" id="year"
+                                                    name="year">
+                                                        <option value="">None</option>
+                                                        @for($i=$currentYear;$i>$currentYear-7;$i--)
+                                                        <option value="{{$i}}">{{$i}}</option>
+                                                        @endfor
+                                                    </select>
+                                                    @if($errors->has('year'))
+                                                    <em class="invalid-feedback">
+                                                        {{ $errors->first('year') }}
+                                                    </em>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-12" style="margin-top:30px;">
-                                    <a class="btn btn-info" href="{{route('admin.country.index')}}">
+                                    <a class="btn btn-info" href="{{route('admin.project.index')}}">
                                         <i class="ri-arrow-left-line"></i> Back to list
                                     </a>
                                     <button class="btn btn-success float-end" type="submit" id="uploadButton">
@@ -345,6 +364,45 @@
                     $('#geocode').html('');
                     $('#geocode').html('<option value="">None</option>');
                     $('#geocode').attr('disabled',true);
+                }
+      
+            });
+
+            //Filter Indicator According to Domain
+            $('#indicator_id').change(function(){
+                let domain = $('#indicator_id').val();
+
+                if(domain){
+                    $.ajax({
+                    url:'{{route('getIndicator')}}',
+                    method:'GET',
+                    data:{
+                        domain:domain
+                    },
+                    success:function(response){
+                        if(response.success){
+                            $('#subindicator_id').html('');
+                            $('#subindicator_id').html('<option value="">None</option>');
+                            $('#subindicator_id').removeAttr('disabled');
+                            $.each(response.data,function(index,indicator){
+                                //Add <option>
+                                    $('#subindicator_id').append(
+                                        $('<option></option')
+                                            .attr('value',indicator.id)
+                                            .text(indicator.title)
+                                    )
+                            });
+                        }else{
+                            $('#subindicator_id').html('');
+                            $('#subindicator_id').html('<option value="">None</option>');
+                            $('#subindicator_id').attr('disabled',true);
+                        }
+                    }
+                });
+                }else{
+                    $('#subindicator_id').html('');
+                    $('#subindicator_id').html('<option value="">None</option>');
+                    $('#subindicator_id').attr('disabled',true);
                 }
       
             });

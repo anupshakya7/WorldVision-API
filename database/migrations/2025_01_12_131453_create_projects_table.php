@@ -26,7 +26,12 @@ return new class extends Migration
             $table->string('link');
             $table->integer('indicator_id');
             $table->integer('subindicator_id');
+            $table->unsignedBigInteger('created_by');
+            $table->unsignedBigInteger('company_id');
             $table->timestamps();
+
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
         });
     }
 

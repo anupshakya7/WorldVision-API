@@ -63,7 +63,6 @@
                                             <th>{{'Longitude'}}</th>
                                             <th>{{'Project'}}</th>
                                             <th>{{'Project Overview'}}</th>
-                                            <th>{{'Link'}}</th>
                                             <th>{{'Domain'}}</th>
                                             <th>{{'Indicator'}}</th>
                                             <th>{{'Created By'}}</th>
@@ -75,16 +74,16 @@
                                         <tr>
                                             <td>{{$project->serial_no}}</td>
                                             <td>{{$project->year}}</td>
-                                            <td>{{$project->region_id}}</td>
-                                            <td>{{optional($project->countrycode)->country}}</td>
-                                            <td>{{optional($project->geocode)->country}}</td>
+                                            <td>{{optional($project->region)->country}}</td>
+                                            <td>{{optional($project->country)->country}}</td>
+                                            <td>{{optional($project->subcountry)->geoname}}</td>
                                             <td>{{$project->latitude}}</td>
                                             <td>{{$project->longitude}}</td>
                                             <td>{{$project->project_title}}</td>
                                             <td>{{Str::limit($project->project_overview,50)}}</td>
-                                            <td>{{$project->link}}</td>
-                                            <td>{{$project->indicator_id->name}}</td>
-                                            <td>{{$project->subindicator_id->name}}</td>
+                                            <td>{{optional($project->domain)->variablename}}</td>
+                                            <td>{{optional($project->indicator)->variablename}}</td>
+                                            <td>{{optional($project->user)->name}}</td>
                                             <td>
                                                 <a href="{{route('admin.project.show',$project)}}"><i
                                                         class="ri-eye-line align-bottom me-2 text-success"></i>

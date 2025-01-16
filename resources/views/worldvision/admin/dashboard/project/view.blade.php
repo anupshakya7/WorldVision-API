@@ -1,5 +1,5 @@
 @extends('worldvision.admin.dashboard.layout.web')
-@section('title','Country View')
+@section('title','Project View')
 @section('content')
 <style>
     button {
@@ -14,13 +14,13 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0">{{"Country"}}</h4>
+                        <h4 class="mb-sm-0">{{"Project"}}</h4>
 
                         <div class="page-title-right">
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item"><a href="{{route('admin.home')}}">World Vision</a></li>
-                                <li class="breadcrumb-item"><a href="{{route('admin.country.index')}}">Country</a></li>
-                                <li class="breadcrumb-item active">{{$country->country}}</li>
+                                <li class="breadcrumb-item"><a href="{{route('admin.project.index')}}">Project</a></li>
+                                <li class="breadcrumb-item active">{{$project->project_title}}</li>
                             </ol>
                         </div>
 
@@ -32,7 +32,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header border-bottom-dashed">
-                            <h5 class="card-title mb-0">{{$country->country}}</h5>
+                            <h5 class="card-title mb-0">{{$project->project_title}}</h5>
                         </div>
 
                         <div class="card-body">
@@ -41,52 +41,64 @@
                                     <tbody>
                                         <tr>
                                             <th>ID</th>
-                                            <td>{{$country->id}}</td>
+                                            <td>{{$project->id}}</td>
                                         </tr>
                                         <tr>
-                                            <th>Title</th>
-                                            <td>{{$country->country}}</td>
+                                            <th>Project</th>
+                                            <td>{{$project->project_title}}</td>
                                         </tr>
                                         <tr>
-                                            <th>Country Code</th>
-                                            <td>{{$country->country_code}}</td>
+                                            <th>Project Overview</th>
+                                            <td>{{$project->project_overview}}</td>
                                         </tr>
                                         <tr>
-                                            <th>Parent Id</th>
-                                            <td>{{optional($country->parentData)->country}}</td>
+                                            <th>Year</th>
+                                            <td>{{$project->year}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Region</th>
+                                            <td>{{optional($project->region)->country}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Country</th>
+                                            <td>{{optional($project->country)->country}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Sub Country</th>
+                                            <td>{{optional($project->subcountry)->geoname}}</td>
                                         </tr>
                                         <tr>
                                             <th>Latitute</th>
-                                            <td>{{$country->latitude}}</td>
+                                            <td>{{$project->latitude}}</td>
                                         </tr>
                                         <tr>
                                             <th>Longitude</th>
-                                            <td>{{$country->longitude}}</td>
+                                            <td>{{$project->longitude}}</td>
                                         </tr>
                                         <tr>
-                                            <th>Bounding Box</th>
-                                            <td>{{$country->bounding_box}}</td>
+                                            <th>Domain</th>
+                                            <td>{{optional($project->domain)->variablename}}</td>
                                         </tr>
                                         <tr>
-                                            <th>Geometry</th>
-                                            <td>{{$country->geometry}}</td>
+                                            <th>Indicator</th>
+                                            <td>{{optional($project->indicator)->variablename}}</td>
                                         </tr>
                                         <tr>
-                                            <th>Level</th>
-                                            <td>{{$country->level == 0 ? 'Region':'Country'}}</td>
+                                            <th>Link</th>
+                                            <td>{{$project->link}}</td>
                                         </tr>
                                         <tr>
                                             <th>Created By</th>
-                                            <td>{{$country->user->name}}</td>
+                                            <td>{{$project->user->name}}</td>
                                         </tr>
                                         <tr>
                                             <th>Created At</th>
-                                            <td>{{Carbon\Carbon::parse($country->created_at)->format('Y-m-d')}}</td>
+                                            <td>{{Carbon\Carbon::parse($project->created_at)->format('Y-m-d')}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 <a style="margin-top:20px;" class="btn btn-info"
-                                    href="{{route('admin.country.index')}}">
+                                    href="{{route('admin.project.index')}}">
                                     <i class="ri-arrow-left-line"></i> Back to list
                                 </a>
                             </div>
