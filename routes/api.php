@@ -51,6 +51,9 @@ Route::get('/summary',[APIAllAPIController::class,'summary']);
 //Download Data
 Route::get('/download-data',[APIAllAPIController::class,'downloadData']);
 
+//Project Piechart
+Route::get('/project-piechart',[APIAllAPIController::class,'projectPieChart']);
+
 //ATI API
 //Check Voice of People
 Route::get('/check-voice-people',[VoiceOfPeopleController::class,'checkCountryYearWise'])->name('check.voice.people');

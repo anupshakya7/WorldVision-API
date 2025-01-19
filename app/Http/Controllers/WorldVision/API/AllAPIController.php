@@ -361,7 +361,7 @@ class AllAPIController extends Controller
 		]);	
      }
 
-     //Train Graph -> Incomplete
+     //Train Graph 
      public function trainGraph(Request $request){
           $validator = Validator::make($request->all(),[
 			'region_id'=>'nullable|integer',
@@ -562,4 +562,57 @@ class AllAPIController extends Controller
                'data'=>$downloadData,
           ]);
      }
+
+     //Project Pie Chart
+     public function projectPieChart(Request $request){
+          $validator = Validator::make($request->all(), [
+               'region_id' => 'nullable|integer',
+               'country_id' => 'nullable|string',
+               'sub_country_id' => 'nullable|string',
+               'indicator_id' => 'required|integer',
+               'sub_indicator_id' => 'nullable|integer',
+               'year' => 'nullable|integer',
+               'order' => 'nullable|string|min:3',
+               'project'=>'nullable|integer'
+          ]);
+     
+          if ($validator->fails()) {
+               return response()->json(['errors' => $validator->errors()]);
+          }
+
+          //Indicators
+          $indicatorQuery = Indicator::query();
+          $indicatorQuery->select('id','variablename as title');
+          if($request->filled('indicator_id')){
+              if($request->indicator_id == 1){
+                    $indicatorQuery->where('level',0)->whereNot('variablename','Overall Score')->where('company_id',1);
+                    $selectField = 'indicator_id';
+               } else{
+                    $indicatorQuery->where('level',1)->where('domain_id',$request->indicator_id)->where('company_id',1);
+                    $selectField = 'subindicator_id';
+               }
+          }
+
+          $indicators = $indicatorQuery->get();
+
+          $indicatorProjects = [];
+          //Projects
+          $projectsQuery = Project::query();
+          
+          if($request->filled(['region_id','country_id','sub_country_id'])){
+               $projectsQuery->where('geocode',$request->sub_country_id);
+          }elseif($request->filled(['region_id','country_id'])){
+               $projectsQuery->where('countrycode',$request->country_id);
+          }elseif($request->filled(['region_id'])){
+               $projectsQuery->where('region_id',$request->region_id);
+          }
+
+          foreach($indicators as $indicator){
+               $projectsClone = clone $projectsQuery;
+               $selectedProject = $projectsClone->where($selectField,$indicator->id)->distinct()->count();
+               
+               $indicatorProjects[$indicator->title] = $selectedProject;
+          }
+          return $indicatorProjects;
+     }    
 }
