@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin\CategoryColor;
 use App\Models\Admin\Country;
 use App\Models\Admin\Indicator;
+use App\Models\Admin\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,18 +73,54 @@ class AllAPIController extends Controller
     public function mapData(Request $request){
           $validator = Validator::make($request->all(), [
                'region_id' => 'nullable|integer',
-               'country_id' => 'nullable',
-               'sub_country_id' => 'nullable',
+               'country_id' => 'nullable|string',
+               'sub_country_id' => 'nullable|string',
                'indicator_id' => 'required|integer',
                'sub_indicator_id' => 'nullable|integer',
                'year' => 'nullable|integer',
-               'order' => 'nullable|string|min:3'
+               'order' => 'nullable|string|min:3',
+               'project'=>'nullable|integer'
           ]);
      
           if ($validator->fails()) {
                return response()->json(['errors' => $validator->errors()]);
           }
 
+          $projects = [];
+          if($request->filled('project')){
+               if($request->filled('sub_country_id')){
+                    $selectCountry = DB::raw('(SELECT geoname FROM sub_countries as country WHERE country.geocode=geocode LIMIT 1) as title');
+               }else{
+                    $selectCountry = DB::raw('(SELECT country FROM countries as country WHERE country.country_code=countrycode LIMIT 1) as title');
+               }
+
+             
+
+               $project = Project::query();
+               $project->select($selectCountry,'year','latitude','longitude','project_title','project_overview','link');
+               
+               if($request->indicator_id != 1 && !$request->filled('sub_indicator_id')){
+                    $project->where('indicator_id',$request->indicator_id);
+               }
+
+               if($request->filled(['region_id','country_id','sub_country_id','indicator_id','sub_indicator_id'])){
+                    $project->where('geocode',$request->sub_country_id)->where('subindicator_id',$request->sub_indicator_id);
+               }elseif($request->filled(['region_id','country_id','indicator_id','sub_indicator_id'])){
+                    $project->where('countrycode',$request->country_id)->where('subindicator_id',$request->sub_indicator_id);
+               }elseif($request->filled(['region_id', 'indicator_id', 'sub_indicator_id'])){
+                    $project->where('region_id',$request->region_id)->where('subindicator_id',$request->sub_indicator_id);
+               }elseif($request->filled(['region_id','country_id','sub_country_id','indicator_id'])){
+                    $project->where('geocode',$request->sub_country_id);
+               }elseif($request->filled(['region_id', 'country_id', 'indicator_id'])){
+                    $project->where('countrycode',$request->country_id);
+               }elseif($request->filled(['region_id','indicator_id'])){
+                    $project->where('region_id',$request->region_id);
+               }elseif($request->filled(['indicator_id','sub_indicator_id'])){
+                    $project->where('subindicator_id',$request->sub_indicator_id);
+               }
+               $projects = $project->distinct()->get();
+          }
+          
           //Set Year if not provided
           $year = $request->year ?? 2023;
 
@@ -149,6 +186,7 @@ class AllAPIController extends Controller
                'success'=>true,
                'parent'=>$parent,
                'color'=>$category_color,
+               'project'=>$projects,
                'count'=>count($map),
                'data'=>$map
           ]);
