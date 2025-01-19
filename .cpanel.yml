@@ -1,4 +1,0 @@
----
-  tasks:
-    - export DEPLOYPATH=/home/shardaitnet/ati.shardait.net/
-    - /bin/cp * $DEPLOYPATH
