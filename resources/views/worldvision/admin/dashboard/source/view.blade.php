@@ -43,10 +43,10 @@
                                             <th>ID</th>
                                             <td>{{$source->id}}</td>
                                         </tr>
-                                        <tr>
+                                        {{-- <tr>
                                             <th>Indicator</th>
-                                            <td>{{$source->indicator->variablename}}</td>
-                                        </tr>
+                                            <td>{{optional($source->indicator)->variablename}}</td>
+                                        </tr> --}}
                                         <tr>
                                             <th>Source</th>
                                             <td>{{$source->source}}</td>

@@ -80,8 +80,8 @@
                                             <td>{{$subCountryData->admin_col}}</td>
                                         </tr>
                                         <tr>
-                                            <th>Source Id</th>
-                                            <td>{{$subCountryData->source_id}}</td>
+                                            <th>Source</th>
+                                            <td>{{optional($subCountryData->source)->source}}</td>
                                         </tr>
                                         <tr>
                                             <th>Statement</th>

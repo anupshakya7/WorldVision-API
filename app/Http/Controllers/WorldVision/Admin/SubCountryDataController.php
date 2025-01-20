@@ -41,8 +41,9 @@ class SubCountryDataController extends Controller
         $indicators = Indicator::select('id', 'variablename')->filterIndicator()->get();
         $subcountries = SubCountry::select('geoname','geocode')->get();
         $countries_colour = CategoryColor::select('country_leg_col','subcountry_leg_col','category')->get();
+        $sources = Source::all(['id','source']);
 
-        return view('worldvision.admin.dashboard.subcountry_data.create', compact('indicators','subcountries','countries_colour'));
+        return view('worldvision.admin.dashboard.subcountry_data.create', compact('indicators','sources','subcountries','countries_colour'));
     }
 
     /**
@@ -84,7 +85,7 @@ class SubCountryDataController extends Controller
      */
     public function show($id)
     {
-        $subCountryData = SubCountryData::with(['indicator','subcountry','user'])->find($id);
+        $subCountryData = SubCountryData::with(['indicator','subcountry','user','source'])->find($id);
 
         if($subCountryData){
             return view('worldvision.admin.dashboard.subcountry_data.view', compact('subCountryData'));
@@ -106,9 +107,10 @@ class SubCountryDataController extends Controller
         $indicators = Indicator::select('id', 'variablename')->filterIndicator()->get();
         $subcountries = SubCountry::select('geoname','geocode')->get();
         $countries_colour = CategoryColor::select('country_leg_col','subcountry_leg_col','category')->get();
+        $sources = Source::all(['id','source']);
 
         if($subcountryData){
-            return view('worldvision.admin.dashboard.subcountry_data.edit', compact('indicators', 'subcountries','countries_colour','subcountryData'));
+            return view('worldvision.admin.dashboard.subcountry_data.edit', compact('indicators', 'subcountries','countries_colour','subcountryData','sources'));
         }else{
             return redirect()->back()->with('error','Data Not Found');
         }

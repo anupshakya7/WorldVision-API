@@ -38,4 +38,8 @@ class SubCountryData extends Model
     public function subcountry(){
         return $this->belongsTo(SubCountry::class,'geocode','geocode');
     }
+
+    public function source(){
+        return $this->belongsTo(Source::class,'source_id');
+    }
 }

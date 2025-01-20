@@ -104,11 +104,15 @@
                                             </div>
                                             <div class="col-12" style="margin-top:20px;">
                                                 <div class="form-group">
-                                                    <label for="source_id">{{ 'Source Id' }} <span
+                                                    <label for="source_id">{{ 'Source' }} <span
                                                             style="color:red;">*</span></label>
-                                                    <input type="text" name="source_id" class="form-control"
-                                                        value="{{ old('source_id') }}"
-                                                        placeholder="Source Id">
+                                                    <select class="form-control form-select" id="source_id"
+                                                    name="source_id">
+                                                        <option value="">None</option>
+                                                        @foreach ($sources as $source)
+                                                        <option value="{{ $source->id }}">{{ $source->source }}</option>
+                                                        @endforeach
+                                                    </select>
                                                     @if($errors->has('source_id'))
                                                     <em class="invalid-feedback">
                                                         {{ $errors->first('source_id') }}
