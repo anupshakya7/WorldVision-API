@@ -203,7 +203,7 @@ class CountryDataController extends Controller
                         return 'indicator_id';
                     }
                     return $value;
-                },$header); 
+                },$header);
 
                 //Replace Indicator with Indicator_Id
                 foreach($data as &$row){
@@ -215,8 +215,8 @@ class CountryDataController extends Controller
                         $row[0] = $indicator;
                     }else{
                         return redirect()->back()->with('error',$indicatorName.' Not Found');
-                    }
-                
+                    }                    
+
                     //Color
                     $color = $row[5];
                     $colorCategory = CategoryColor::where('country_leg_col',$color)->pluck('category')->first();
@@ -230,7 +230,7 @@ class CountryDataController extends Controller
                     $row[8] = auth()->user()->id;
                     $row[9] = auth()->user()->company_id;
                 }
-            
+
                 $batch->add(new CountryCSVData($header,$data));
             }
         }

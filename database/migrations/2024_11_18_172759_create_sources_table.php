@@ -14,10 +14,10 @@ return new class () extends Migration {
     {
         Schema::create('sources', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('indicator_id');
+            $table->unsignedBigInteger('indicator_id')->nullable();
             $table->string('source')->nullable();
             $table->integer('data_level')->nullable();
-            $table->integer('impid');
+            $table->string('impid')->nullable();
             $table->string('units')->nullable();
             $table->text('description')->nullable();
             $table->text('url')->nullable();

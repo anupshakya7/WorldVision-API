@@ -55,9 +55,9 @@
                                     <thead>
                                         <tr>
                                             <th>{{'#'}}</th>
-                                            <th>{{'Indicator'}}</th>
+                                            {{-- <th>{{'Indicator'}}</th> --}}
                                             <th>{{'Source'}}</th>
-                                            <th>{{'Data Level'}}</th>
+                                            {{-- <th>{{'Data Level'}}</th> --}}
                                             <th>{{'Impid'}}</th>
                                             <th>{{'Units'}}</th>
                                             <th>{{'Description'}}</th>
@@ -70,10 +70,10 @@
                                     <tbody>
                                         @foreach($sources as $source)
                                         <tr>
-                                            <td>{{$source->id}}</td>
-                                            <td>{{$source->indicator->variablename}}</td>
+                                            <td>{{$source->serial_no}}</td>
+                                            {{-- <td>{{optional($source->indicator)->variablename}}</td> --}}
                                             <td>{{$source->source}}</td>
-                                            <td>{{$source->data_level}}</td>
+                                            {{-- <td>{{$source->data_level}}</td> --}}
                                             <td>{{$source->impid}}</td>
                                             <td>{{$source->units}}</td>
                                             <td>{{Str::limit($source->description,100)}}</td>

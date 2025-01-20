@@ -21,9 +21,9 @@ return new class extends Migration
             $table->decimal('raw',16,9);
             $table->decimal('banded',11,9);
             $table->integer('in_country_rank');
-            $table->integer('admin_cat');
+            $table->integer('admin_cat')->nullable();
             $table->string('admin_col');
-            $table->integer('source_id');
+            $table->integer('source_id')->nullable();
             $table->text('statements');
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('company_id');

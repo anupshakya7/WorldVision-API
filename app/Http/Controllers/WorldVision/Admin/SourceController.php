@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\WorldVision\Admin;
 
+use App\Helpers\PaginationHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Indicator;
 use App\Models\Admin\Source;
@@ -18,6 +19,7 @@ class SourceController extends Controller
     public function index()
     {
         $sources = Source::with(['indicator','user'])->filterSource()->paginate(10);
+        $sources = PaginationHelper::addSerialNo($sources);
 
         if($sources){
             return view('worldvision.admin.dashboard.source.index', compact('sources'));
@@ -47,14 +49,14 @@ class SourceController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'indicator_id' => 'required|integer|exists:indicators,id',
+            'indicator_id' => 'nullable|integer|exists:indicators,id',
             'source' => 'required|string|max:255',
             'data_level' => 'nullable|integer|min:0',
-            'impid' => 'required|integer|min:0',
+            'impid' => 'required|string|min:0',
             'units' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'url' => 'nullable|url',
-            'link' => 'nullable|url',
+            'url' => 'nullable|string',
+            'link' => 'nullable|string',
         ]);
 
         //Adding Created By User Id
@@ -106,14 +108,14 @@ class SourceController extends Controller
     public function update(Request $request, Source $source)
     {
         $validatedData = $request->validate([
-            'indicator_id' => 'required|integer|exists:indicators,id',
+            'indicator_id' => 'nullable|integer|exists:indicators,id',
             'source' => 'required|string|max:255',
             'data_level' => 'nullable|integer|min:0',
-            'impid' => 'required|integer|min:0',
+            'impid' => 'required|string|min:0',
             'units' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'url' => 'nullable|url',
-            'link' => 'nullable|url',
+            'url' => 'nullable|string',
+            'link' => 'nullable|string',
         ]);
 
         //Adding Created By User Id

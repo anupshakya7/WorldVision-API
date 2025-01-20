@@ -66,7 +66,7 @@
                                 <div class="row">
                                     <div class="col-md-8">
                                         <div class="row">
-                                            <div class="col-12">
+                                            {{-- <div class="col-12">
                                                 <div class="form-group">
                                                 <label for="indicator_id">Indicator <span
                                                     style="color:red;">*</span></label>
@@ -83,8 +83,8 @@
                                                 </em>
                                                 @endif
                                             </div>
-                                            </div>
-                                            <div class="col-12" style="margin-top:20px;">
+                                            </div> --}}
+                                            <div class="col-12">
                                                 <div class="form-group">
                                                     <label for="source">{{ 'Source' }} <span
                                                         style="color:red;">*</span></label>
@@ -100,8 +100,8 @@
                                             <div class="col-12" style="margin-top:20px;">
                                                 <div class="form-group">
                                                     <label for="description">Description</label>
-                                                    <textarea class="form-control" id="description" name="description"
-                                                        rows="4">{{ old('description') }}</textarea>
+                                                    <textarea class="form-control" id="description" name="description" placeholder="Description"
+                                                        rows="5">{{ old('description') }}</textarea>
                                                     @if($errors->has('description'))
                                                     <em class="invalid-feedback">
                                                         {{ $errors->first('description') }}
@@ -125,7 +125,7 @@
 
                                     </div>
 
-                                    <div class="col-4">
+                                    <div class="col-md-4">
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="form-group">

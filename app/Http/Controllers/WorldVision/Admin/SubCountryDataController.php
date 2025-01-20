@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SubCountryCSVData;
 use App\Models\Admin\CategoryColor;
 use App\Models\Admin\Indicator;
+use App\Models\Admin\Source;
 use App\Models\Admin\SubCountry;
 use App\Models\Admin\SubCountryData;
 use Illuminate\Http\Request;
@@ -210,13 +211,16 @@ class SubCountryDataController extends Controller
                 if($key == 0){
                     $header = $data[0];
                     unset($data[0]);
-                    $newHeader = ['admin_cat','created_by','company_id'];
+                    $newHeader = ['created_by','company_id'];
                     $header = array_merge($header,$newHeader);
                 }
 
                 $header = array_map(function($value){
                     if($value == 'indicator'){
                         return 'indicator_id';
+                    }
+                    if($value == 'source'){
+                        return 'source_id';
                     }
                     return $value;
                 },$header);
@@ -231,10 +235,26 @@ class SubCountryDataController extends Controller
                         return redirect()->back()->with('error',$indicatorName.' Not Found');
                     }
 
-                    $row[10] = auth()->user()->id;
-                    $row[11] = auth()->user()->company_id;
+                    //Source
+                    $sourceName = $row[7];
+                    $source = Source::where('source',$sourceName)->pluck('id')->first();
+
+                    if($source){
+                        $row[7] = $source;
+                    }else{
+                        $sourceNew = Source::create([
+                            'source'=>$sourceName,
+                            'created_by'=>auth()->user()->id,
+                            'company_id'=>auth()->user()->company_id
+                        ]);
+                        $row[7] = $sourceNew->id;
+                    }
+
+
+                    $row[9] = auth()->user()->id;
+                    $row[10] = auth()->user()->company_id;
                 }
-                
+
                 $batch->add(new SubCountryCSVData($header,$data));
             }
         }
