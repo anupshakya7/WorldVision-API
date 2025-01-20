@@ -599,6 +599,7 @@ class AllAPIController extends Controller
           $indicatorProjects = [];
           //Projects
           $projectsQuery = Project::query();
+          $projectsQuery->select('year','project_title','project_overview','link');
           
           if($request->filled(['region_id','country_id','sub_country_id'])){
                $projectsQuery->where('geocode',$request->sub_country_id);
@@ -610,10 +611,14 @@ class AllAPIController extends Controller
 
           foreach($indicators as $indicator){
                $projectsClone = clone $projectsQuery;
-               $selectedProject = $projectsClone->where($selectField,$indicator->id)->distinct()->count();
+               $selectedProject = $projectsClone->where($selectField,$indicator->id)->distinct()->get();
                
-               $indicatorProjects[$indicator->title] = $selectedProject;
+               $indicatorProjects[$indicator->title] = count($selectedProject);
           }
-          return $indicatorProjects;
+          
+          return response()->json([
+               'success'=>true,
+               'data'=>$indicatorProjects
+          ]);
      }    
 }
