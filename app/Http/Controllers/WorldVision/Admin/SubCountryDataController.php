@@ -210,6 +210,29 @@ class SubCountryDataController extends Controller
                 if($key == 0){
                     $header = $data[0];
                     unset($data[0]);
+                    $newHeader = ['admin_cat','created_by','company_id'];
+                    $header = array_merge($header,$newHeader);
+                }
+
+                $header = array_map(function($value){
+                    if($value == 'indicator'){
+                        return 'indicator_id';
+                    }
+                    return $value;
+                },$header);
+
+                foreach($data as &$row){
+                    $indicatorName = $row[0];
+                    $indicator = Indicator::where('variablename',$indicatorName)->pluck('id')->first();  
+
+                    if($indicator){
+                        $row[0] = $indicator;
+                    }else{
+                        return redirect()->back()->with('error',$indicatorName.' Not Found');
+                    }
+
+                    $row[10] = auth()->user()->id;
+                    $row[11] = auth()->user()->company_id;
                 }
                 
                 $batch->add(new SubCountryCSVData($header,$data));

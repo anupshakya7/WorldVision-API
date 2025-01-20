@@ -1,7 +1,7 @@
-indicator_id,countrycode,year,country_score,country_col,country_cat,created_by,company_id
-1,AFG,2023,4.623054256,#d73027,Very High,1,1
-2,AGO,2023,4.607524656,#d73027,Very High,1,1
-11,ALB,2023,3.500672186,#fee98b,Medium,1,1
-5,ARE,2023,1.688120148,#1a9850,Very Low,1,1
-2,ARG,2023,3.031915444,#a6d96a,Low,1,1
-6,ARM,2023,3.648924806,#fdae61,High,1,1
+indicator,countrycode,year,country_score,banded,country_col,remarks
+Overall Score,AFG,2023,4.623054256,4.623054256,#d73027,Afghanistan overall value
+Extreme Deprivation,AGO,2023,4.607524656,4.607524656,#d73027,Angola extreme value
+Child Mortality,ALB,2023,3.500672186,3.500672186,#fee98b,Albania Child Mortality value
+Urbanisation,ARE,2023,1.688120148,1.688120148,#1a9850,United Arab Emirates Urbanisation value
+Extreme Deprivation,ARG,2023,3.031915444,3.031915444,#a6d96a,Argentina Extreme value
+Exposure to Violence and Abuse,ARM,2023,3.648924806,3.648924806,#fdae61,Armenia Exposure Value

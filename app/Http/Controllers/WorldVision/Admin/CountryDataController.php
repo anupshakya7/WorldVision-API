@@ -148,8 +148,8 @@ class CountryDataController extends Controller
         $countriesData = CountryData::with(['indicator','country','user'])->filterWorldVisionData()->get();
         $filename = "country-data.csv";
         $fp = fopen($filename,'w+');
-        fputcsv($fp,array('ID','Indicator','Country','Country Code','Year','Country Score','Country Color','Country Cateory','Created By','Created At'));
-
+        fputcsv($fp,array('ID','Indicator','Country','Country Code','Year','Country Score','Country Color','Country Cateory','Remarks','Created By','Created At'));
+ 
         foreach($countriesData as $row){
             fputcsv($fp,array(
                 $row->id,
@@ -160,6 +160,7 @@ class CountryDataController extends Controller
                 $row->country_score,
                 $row->country_col,
                 $row->country_cat,
+                $row->remarks,
                 $row->user->name,
                 $row->created_at
             ));
@@ -193,7 +194,43 @@ class CountryDataController extends Controller
                 if($key == 0){
                     $header = $data[0];
                     unset($data[0]);
+                    $newHeader = ['country_cat','created_by','company_id'];
+                    $header = array_merge($header,$newHeader);
                 }
+            
+                $header = array_map(function($value){
+                    if($value == 'indicator'){
+                        return 'indicator_id';
+                    }
+                    return $value;
+                },$header); 
+
+                //Replace Indicator with Indicator_Id
+                foreach($data as &$row){
+                    //Indicator
+                    $indicatorName = $row[0];
+                    $indicator = Indicator::where('variablename',$indicatorName)->pluck('id')->first();
+
+                    if($indicator){
+                        $row[0] = $indicator;
+                    }else{
+                        return redirect()->back()->with('error',$indicatorName.' Not Found');
+                    }
+                
+                    //Color
+                    $color = $row[5];
+                    $colorCategory = CategoryColor::where('country_leg_col',$color)->pluck('category')->first();
+
+                    if($colorCategory){
+                        $row[7] = $colorCategory;
+                    }else{
+                        return redirect()->back()->with('error',$indicatorName.' Not Found'); 
+                    }
+                    
+                    $row[8] = auth()->user()->id;
+                    $row[9] = auth()->user()->company_id;
+                }
+            
                 $batch->add(new CountryCSVData($header,$data));
             }
         }
