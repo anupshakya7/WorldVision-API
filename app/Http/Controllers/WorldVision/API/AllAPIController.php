@@ -306,6 +306,7 @@ class AllAPIController extends Controller
 		
 		//Set Year if Choose
 		$year = $request->year ?? 2023;
+          $order = $request->order ?? 'DESC';
 		
           if($request->filled('sub_country_id') || $request->filled('country_id')){
                $table = 'sub_countries';
@@ -351,7 +352,7 @@ class AllAPIController extends Controller
                $parent = null;
           }
 		
-          $results = $countryScore->where('cd.year',$year)->get();
+          $results = $countryScore->where('cd.year',$year)->orderBy('country_score',$order)->get();
 
 		return response()->json([
 			'status'=>true,
