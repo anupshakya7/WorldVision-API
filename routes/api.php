@@ -30,6 +30,9 @@ Route::get('/get-country-sub-country',[ProjectController::class,'filterCountrySu
 //Get Indicator
 Route::get('/get-indicator',[ProjectController::class,'filterIndicator'])->name('getIndicator');
 
+//Check User
+Route::get('/check-user',[APIAllAPIController::class,'checkUser']);
+
 //Parent Data -> Country Data
 Route::get('parent-data',[APIAllAPIController::class,'parentData']);
 

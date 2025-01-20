@@ -14,12 +14,46 @@ use Illuminate\Support\Facades\Validator;
 
 class AllAPIController extends Controller
 {
+     //Check User
+     public function checkUser(Request $request){
+          $validator = Validator::make($request->all(),[
+               'api_token'=>'required'
+          ]);
+
+          if($validator->fails()){
+               return response()->json(['errors'=>$validator->errors()]);
+          }
+          
+          //Company Id
+          if($request->api_token == 'NzjmGy79BYV0OcTZKxp2wt7JeOzczZ'){
+               $company_id = 1;
+          }elseif($request->api_token == 'bNksIVzXjanOrN4GDpcZbqudsURRlo'){
+               $company_id = 2;
+          }
+
+          //Check User
+          $check = User::where('api_token',$request->api_token);
+          if(isset($company_id)){
+               $check->where('company_id',$company_id);
+          }
+          $result = $check->first(); 
+          
+          $status = $result ? true : false;
+          $user = $result ? $result->name : 'No User Found';
+
+          //Response
+          return response()->json([
+               'success'=>$status,
+               'user' => $user
+          ]);
+     }
+
      // //Parent Data
      public function parentData(Request $request){
           $validator = Validator::make($request->all(), [
                'region_id' => 'nullable|integer',
-               'country_id' => 'nullable',
-               'sub_country_id' => 'nullable'
+               'country_id' => 'nullable|string',
+               'sub_country_id' => 'nullable|string'
           ]);
 
           if ($validator->fails()) {
