@@ -66,9 +66,9 @@
                                             <th>{{'Raw'}}</th>
                                             <th>{{'Banded'}}</th>
                                             <th>{{'In Country Rank'}}</th>
-                                            <th>{{'Admin Category'}}</th>
+                                            {{-- <th>{{'Admin Category'}}</th> --}}
                                             <th>{{'Admin Color'}}</th>
-                                            <th>{{'Source Id'}}</th>
+                                            <th>{{'Source'}}</th>
                                             <th>{{'Statement'}}</th>
                                             <th>{{'Created By'}}</th>
                                             <th>{{'Action'}}</th>
@@ -85,9 +85,9 @@
                                             <td>{{$subcountryData->raw}}</td>
                                             <td>{{$subcountryData->banded}}</td>
                                             <td>{{$subcountryData->in_country_rank}}</td>
-                                            <td>{{$subcountryData->admin_cat}}</td>
+                                            {{-- <td>{{$subcountryData->admin_cat}}</td> --}}
                                             <td>{{$subcountryData->admin_col}}</td>
-                                            <td>{{$subcountryData->source_id}}</td>
+                                            <td>{{optional($subcountryData->source)->source}}</td>
                                             <td>{{Str::limit($subcountryData->statements,50)}}</td>
                                             <td>{{$subcountryData->user->name}}</td>
                                             <td>

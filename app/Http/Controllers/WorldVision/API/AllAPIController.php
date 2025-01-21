@@ -69,12 +69,12 @@ class AllAPIController extends Controller
           }
 
           $countryQuery = DB::table($table)->select($select);
-          $parentQuery = Country::select('id','country','country_code');
+          $parentQuery = Country::select('id','country','country_code','parent_id');
 
           if($request->filled(['region_id','country_id','sub_country_id'])){
                $parent = $parentQuery->where('country_code',$request->country_id)->first();
                $country = $countryQuery->where('countrycode',$request->country_id)->where('geocode',$request->sub_country_id)->get();
-          }elseif($request->filled(['region_id','country_id'])){
+          }elseif($request->filled(['region_id','country_id']) || $request->filled('country_id')){
                $parent = $parentQuery->where('country_code',$request->country_id)->first();
                $country = $countryQuery->where('countrycode',$request->country_id)->get();
           }elseif($request->filled(['region_id'])){

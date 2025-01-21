@@ -61,7 +61,7 @@ class SubCountryDataController extends Controller
             'raw' => 'required|numeric|between:-9999999999999999.999,9999999999999999.999',
             'banded' => 'required|numeric|between:-99999999999.999,99999999999.999',
             'in_country_rank' => 'required|integer|min:0',
-            'admin_cat' => 'required|integer|min:0',
+            'admin_cat' => 'nullable|integer|min:0',
             'admin_col' => 'required|string',
             'source_id' => 'required|integer',
             'statements' => 'required|string'
@@ -133,7 +133,7 @@ class SubCountryDataController extends Controller
             'raw' => 'required|numeric|between:-9999999999999999.999,9999999999999999.999',
             'banded' => 'required|numeric|between:-99999999999.999,99999999999.999',
             'in_country_rank' => 'required|integer|min:0',
-            'admin_cat' => 'required|integer|min:0',
+            'admin_cat' => 'nullable|integer|min:0',
             'admin_col' => 'required|string',
             'source_id' => 'required|integer',
             'statements' => 'required|string'
@@ -162,10 +162,10 @@ class SubCountryDataController extends Controller
 
     //Export csv file
     public function generateCSV(){
-        $subCountriesData = SubCountryData::with(['indicator','subcountry','user'])->get();
+        $subCountriesData = SubCountryData::with(['indicator','subcountry','user','source'])->get();
         $filename = 'sub-country-data.csv';
         $fp = fopen($filename,'w+');
-        fputcsv($fp,array('ID','Indicator','Sub Country','Geo Code','Year','Raw','Banded','In Country Rank','Admin Category','Admin Color','Source Id','Statement','Created By','Created At'));
+        fputcsv($fp,array('ID','Indicator','Sub Country','Geo Code','Year','Raw','Banded','In Country Rank','Admin Category','Admin Color','Source','Statement','Created By','Created At'));
 
         foreach($subCountriesData as $row){
             fputcsv($fp,array(
@@ -179,7 +179,7 @@ class SubCountryDataController extends Controller
                 $row->in_country_rank,
                 $row->admin_cat,
                 $row->admin_col,
-                $row->source_id,
+                optional($row->source)->source,
                 $row->statements,
                 $row->user->name,
                 $row->created_at,

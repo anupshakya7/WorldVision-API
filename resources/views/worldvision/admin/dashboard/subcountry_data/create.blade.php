@@ -196,8 +196,7 @@
                                             </div>
                                             <div class="col-12" style="margin-top:20px;">
                                                 <div class="form-group">
-                                                    <label for="admin_cat">{{ 'Admin Category' }} <span
-                                                            style="color:red;">*</span></label>
+                                                    <label for="admin_cat">{{ 'Admin Category' }}</label>
                                                     <input type="text" name="admin_cat" id="admin_cat" class="form-control"
                                                             value="{{ old('admin_cat') }}" placeholder="Admin Category"
                                                     @if($errors->has('admin_cat'))
