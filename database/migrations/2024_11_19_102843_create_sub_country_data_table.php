@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('geocode');
             $table->integer('year');
             $table->decimal('raw',16,9);
-            $table->decimal('banded',11,9);
+            $table->decimal('banded',16,9);
             $table->integer('in_country_rank');
             $table->integer('admin_cat')->nullable();
             $table->string('admin_col');

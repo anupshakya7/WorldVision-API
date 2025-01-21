@@ -203,9 +203,12 @@ class SubCountryDataController extends Controller
 
         if($request->has('csv_file')){
             $csv = file($request->csv_file);
-            $chunks = array_chunk($csv,1000);
+            $chunks = array_chunk($csv,5000);
             $header = [];
             $batch = Bus::batch([])->dispatch();
+           
+            $maxValue = 2147483647;
+            $minValue = -2147483648;
 
             foreach($chunks as $key=>$chunk){
                 $data = array_map('str_getcsv',$chunk);
@@ -236,6 +239,13 @@ class SubCountryDataController extends Controller
                     }else{
                         return redirect()->back()->with('error',$indicatorName.' Not Found');
                     }
+
+                    $bandedValue = $row[4];
+                    if($bandedValue > $maxValue || $bandedValue < $minValue){
+                        $bandedValue = 0.0;
+                        $row[4] = $bandedValue;
+                    }
+                    
 
                     //Source
                     $sourceName = $row[7];

@@ -219,7 +219,7 @@ class AllAPIController extends Controller
           return response()->json([
                'success'=>true,
                'parent'=>$parent,
-               'color'=>isset($category_color) ? $category_color : [],
+               'color'=>isset($category_color) ? $category_color:[],
                'project'=>$projects,
                'count'=>count($map),
                'data'=>$map
