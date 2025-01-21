@@ -128,8 +128,6 @@ class AllAPIController extends Controller
                     $selectCountry = DB::raw('(SELECT country FROM countries as country WHERE country.country_code=countrycode LIMIT 1) as title');
                }
 
-             
-
                $project = Project::query();
                $project->select($selectCountry,'year','latitude','longitude','project_title','project_overview','link');
                
@@ -207,19 +205,21 @@ class AllAPIController extends Controller
           $map = $mapQuery->where('cd.year',$year)->get();
 
           //Color Data
-          if($request->filled('sub_country_id') || $request->filled('country_id')){
-               $colors = CategoryColor::select('country_leg_col','subcountry_leg_col')->where('subcountry_leg_col',$map[0]->country_color)->first();
-               $mainColor = $colors->country_leg_col;
-               
-               $category_color = CategoryColor::select('subcountry_col_order as level','subcountry_leg_col as color')->where('country_leg_col',$mainColor)->get();     
-          }else{
-               $category_color = CategoryColor::select('country_col_order as level','country_leg_col as color')->distinct()->get();
+          if(count($map)>0){
+               if($request->filled('sub_country_id') || $request->filled('country_id')){
+                    $colors = CategoryColor::select('country_leg_col','subcountry_leg_col')->where('subcountry_leg_col',$map[0]->country_color)->first();
+                    $mainColor = $colors->country_leg_col;
+                    
+                    $category_color = CategoryColor::select('subcountry_col_order as level','subcountry_leg_col as color')->where('country_leg_col',$mainColor)->get();     
+               }else{
+                    $category_color = CategoryColor::select('country_col_order as level','country_leg_col as color')->distinct()->get();
+               }
           }
 
           return response()->json([
                'success'=>true,
                'parent'=>$parent,
-               'color'=>$category_color,
+               'color'=>isset($category_color) ? $category_color : [],
                'project'=>$projects,
                'count'=>count($map),
                'data'=>$map

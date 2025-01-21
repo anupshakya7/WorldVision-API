@@ -219,7 +219,7 @@ class CountryDataController extends Controller
 
                     //Color
                     $color = $row[5];
-                    $colorCategory = CategoryColor::where('country_leg_col',$color)->pluck('category')->first();
+                    $colorCategory = CategoryColor::where('subcountry_leg_col',$color)->pluck('category')->first();
 
                     if($colorCategory){
                         $row[7] = $colorCategory;
