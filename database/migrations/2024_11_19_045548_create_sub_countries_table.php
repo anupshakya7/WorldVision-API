@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('countrycode');
             $table->string('geocode');
             $table->string('geoname');
+            $table->integer('level')->default(2);
             $table->longText('geometry')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('company_id');
