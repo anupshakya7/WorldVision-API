@@ -161,7 +161,7 @@ class AllAPIController extends Controller
                $dataTable = 'sub_country_data';
                $joinFirstColumn ='c.geocode';
                $joinSecondColumn = 'cd.geocode';
-               $select = ['c.id','c.countrycode','c.geoname as title','c.geocode as geo_code','c.geometry','cd.year as data_year','cd.raw as country_score','cd.admin_col as country_color','cd.statements as statements'];
+               $select = ['c.id','c.countrycode','c.geoname as title','c.geocode as geo_code','c.level','c.geometry','cd.year as data_year','cd.raw as country_score','cd.admin_col as country_color','cd.statements as statements'];
           }else{
                $table = 'countries';
                $dataTable = 'country_data';
