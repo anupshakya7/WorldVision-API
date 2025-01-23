@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\APITokenAuthenticate;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -66,6 +67,7 @@ class Kernel extends HttpKernel
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-        'check_company' => \App\Http\Middleware\CheckCompany::class
+        'check_company' => \App\Http\Middleware\CheckCompany::class,
+        'api.token'=>APITokenAuthenticate::class
     ];
 }

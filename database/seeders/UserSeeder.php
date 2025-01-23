@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
-            'api_token' => Str::random(30),
+            'api_token' => hash('sha256',Str::random(30)),
             'company_id' => $companies->first()->id
         ])->assignRole('admin');
 
@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin ATI',
             'email' => 'admin_ati@admin.com',
             'password' => Hash::make('password'),
-            'api_token' => Str::random(30),
+            'api_token' => hash('sha256',Str::random(30)),
             'company_id' => $companies->first()->id+1
         ])->assignRole('admin');
     }

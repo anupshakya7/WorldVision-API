@@ -87,146 +87,146 @@ class AllAPIController extends Controller
 
 
           if(!empty($parent)){
-			return response()->json([
-				'success' => true,
-				'parent'=>$parent,
-				'data' => $country
-			], 200);
-		}else{
-			$countries = Country::where('level',1)->get(['id','country_code','country as title','parent_id']);
-			return response()->json([
-				'success' => true,
-				'parent'=>$parent,
-				'data' => $country,
-				'countries'=>$countries
-			], 200);
-		}
+               return response()->json([
+                    'success' => true,
+                    'parent'=>$parent,
+                    'data' => $country
+               ], 200);
+          }else{
+               $countries = Country::where('level',1)->get(['id','country_code','country as title','parent_id']);
+               return response()->json([
+                    'success' => true,
+                    'parent'=>$parent,
+                    'data' => $country,
+                    'countries'=>$countries
+               ], 200);
+          }
      }
 
      //Map Data
-    public function mapData(Request $request){
-          $validator = Validator::make($request->all(), [
-               'region_id' => 'nullable|integer',
-               'country_id' => 'nullable|string',
-               'sub_country_id' => 'nullable|string',
-               'indicator_id' => 'required|integer',
-               'sub_indicator_id' => 'nullable|integer',
-               'year' => 'nullable|integer',
-               'order' => 'nullable|string|min:3',
-               'project'=>'nullable|integer'
-          ]);
-     
-          if ($validator->fails()) {
-               return response()->json(['errors' => $validator->errors()]);
-          }
-
-          $projects = [];
-          if($request->filled('project')){
-               if($request->filled('sub_country_id')){
-                    $selectCountry = DB::raw('(SELECT geoname FROM sub_countries as country WHERE country.geocode=geocode LIMIT 1) as title');
-               }else{
-                    $selectCountry = DB::raw('(SELECT country FROM countries as country WHERE country.country_code=countrycode LIMIT 1) as title');
+     public function mapData(Request $request){
+               $validator = Validator::make($request->all(), [
+                    'region_id' => 'nullable|integer',
+                    'country_id' => 'nullable|string',
+                    'sub_country_id' => 'nullable|string',
+                    'indicator_id' => 'required|integer',
+                    'sub_indicator_id' => 'nullable|integer',
+                    'year' => 'nullable|integer',
+                    'order' => 'nullable|string|min:3',
+                    'project'=>'nullable|integer'
+               ]);
+          
+               if ($validator->fails()) {
+                    return response()->json(['errors' => $validator->errors()]);
                }
 
-               $project = Project::query();
-               $project->select($selectCountry,'year','latitude','longitude','project_title','project_overview','link');
+               $projects = [];
+               if($request->filled('project')){
+                    if($request->filled('sub_country_id')){
+                         $selectCountry = DB::raw('(SELECT geoname FROM sub_countries as country WHERE country.geocode=geocode LIMIT 1) as title');
+                    }else{
+                         $selectCountry = DB::raw('(SELECT country FROM countries as country WHERE country.country_code=countrycode LIMIT 1) as title');
+                    }
+
+                    $project = Project::query();
+                    $project->select($selectCountry,'year','latitude','longitude','project_title','project_overview','link');
+                    
+                    if($request->indicator_id != 1 && !$request->filled('sub_indicator_id')){
+                         $project->where('indicator_id',$request->indicator_id);
+                    }
+
+                    if($request->filled(['region_id','country_id','sub_country_id','indicator_id','sub_indicator_id'])){
+                         $project->where('geocode',$request->sub_country_id)->where('subindicator_id',$request->sub_indicator_id);
+                    }elseif($request->filled(['region_id','country_id','indicator_id','sub_indicator_id'])){
+                         $project->where('countrycode',$request->country_id)->where('subindicator_id',$request->sub_indicator_id);
+                    }elseif($request->filled(['region_id', 'indicator_id', 'sub_indicator_id'])){
+                         $project->where('region_id',$request->region_id)->where('subindicator_id',$request->sub_indicator_id);
+                    }elseif($request->filled(['region_id','country_id','sub_country_id','indicator_id'])){
+                         $project->where('geocode',$request->sub_country_id);
+                    }elseif($request->filled(['region_id', 'country_id', 'indicator_id'])){
+                         $project->where('countrycode',$request->country_id);
+                    }elseif($request->filled(['region_id','indicator_id'])){
+                         $project->where('region_id',$request->region_id);
+                    }elseif($request->filled(['indicator_id','sub_indicator_id'])){
+                         $project->where('subindicator_id',$request->sub_indicator_id);
+                    }
+                    $projects = $project->distinct()->get();
+               }
                
-               if($request->indicator_id != 1 && !$request->filled('sub_indicator_id')){
-                    $project->where('indicator_id',$request->indicator_id);
+               //Set Year if not provided
+               $year = $request->year ?? 2023;
+
+               if($request->filled('sub_country_id') || $request->filled('country_id')){
+                    $table = 'sub_countries';
+                    $dataTable = 'sub_country_data';
+                    $joinFirstColumn ='c.geocode';
+                    $joinSecondColumn = 'cd.geocode';
+                    $select = ['c.id','c.countrycode','c.geoname as title','c.geocode as geo_code','c.level','c.geometry','cd.year as data_year','cd.raw as country_score','cd.admin_col as country_color','cd.statements as statements'];
+               }else{
+                    $table = 'countries';
+                    $dataTable = 'country_data';
+                    $joinFirstColumn ='c.country_code';
+                    $joinSecondColumn = 'cd.countrycode';
+                    $select = ['c.id','c.parent_id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude','c.geometry','cd.year as data_year','cd.country_score','cd.country_col as country_color','cd.country_cat as country_category'];
                }
+
+               //Map Data
+               $mapQuery = DB::table($table." as c")->join($dataTable.' as cd',$joinFirstColumn,'=',$joinSecondColumn)->select($select);
+
+               //Parent Data
+               $parentQuery = DB::table('countries as c');
 
                if($request->filled(['region_id','country_id','sub_country_id','indicator_id','sub_indicator_id'])){
-                    $project->where('geocode',$request->sub_country_id)->where('subindicator_id',$request->sub_indicator_id);
+                    $mapQuery->where('c.geocode',$request->sub_country_id)->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->sub_indicator_id);
+                    $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
                }elseif($request->filled(['region_id','country_id','indicator_id','sub_indicator_id'])){
-                    $project->where('countrycode',$request->country_id)->where('subindicator_id',$request->sub_indicator_id);
+                    $mapQuery->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->sub_indicator_id);
+                    $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
                }elseif($request->filled(['region_id', 'indicator_id', 'sub_indicator_id'])){
-                    $project->where('region_id',$request->region_id)->where('subindicator_id',$request->sub_indicator_id);
+                    $mapQuery->where('c.parent_id',$request->region_id)->where('c.level',1)->where('cd.indicator_id',$request->sub_indicator_id);
+                    $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.id',$request->region_id)->first();
                }elseif($request->filled(['region_id','country_id','sub_country_id','indicator_id'])){
-                    $project->where('geocode',$request->sub_country_id);
+                    $mapQuery->where('c.geocode',$request->sub_country_id)->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->indicator_id);
+                    $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
                }elseif($request->filled(['region_id', 'country_id', 'indicator_id'])){
-                    $project->where('countrycode',$request->country_id);
+                    $mapQuery->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->indicator_id);
+                    $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
                }elseif($request->filled(['region_id','indicator_id'])){
-                    $project->where('region_id',$request->region_id);
+                    $mapQuery->where('c.parent_id',$request->region_id)->where('c.level',1)->where('cd.indicator_id',$request->indicator_id);
+                    $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.id',$request->region_id)->first();
                }elseif($request->filled(['indicator_id','sub_indicator_id'])){
-                    $project->where('subindicator_id',$request->sub_indicator_id);
+                    $mapQuery->where('c.level',1)->where('cd.indicator_id',$request->sub_indicator_id);
+                    $parent = null;
+               }elseif($request->filled('indicator_id')){
+                    $mapQuery->where('c.level',1)->where('cd.indicator_id',$request->indicator_id);
+                    $parent = null;
                }
-               $projects = $project->distinct()->get();
-          }
-          
-          //Set Year if not provided
-          $year = $request->year ?? 2023;
 
-          if($request->filled('sub_country_id') || $request->filled('country_id')){
-               $table = 'sub_countries';
-               $dataTable = 'sub_country_data';
-               $joinFirstColumn ='c.geocode';
-               $joinSecondColumn = 'cd.geocode';
-               $select = ['c.id','c.countrycode','c.geoname as title','c.geocode as geo_code','c.level','c.geometry','cd.year as data_year','cd.raw as country_score','cd.admin_col as country_color','cd.statements as statements'];
-          }else{
-               $table = 'countries';
-               $dataTable = 'country_data';
-               $joinFirstColumn ='c.country_code';
-               $joinSecondColumn = 'cd.countrycode';
-               $select = ['c.id','c.parent_id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude','c.geometry','cd.year as data_year','cd.country_score','cd.country_col as country_color','cd.country_cat as country_category'];
-          }
+               $map = $mapQuery->where('cd.year',$year)->get();
 
-          //Map Data
-          $mapQuery = DB::table($table." as c")->join($dataTable.' as cd',$joinFirstColumn,'=',$joinSecondColumn)->select($select);
-
-          //Parent Data
-          $parentQuery = DB::table('countries as c');
-
-          if($request->filled(['region_id','country_id','sub_country_id','indicator_id','sub_indicator_id'])){
-               $mapQuery->where('c.geocode',$request->sub_country_id)->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->sub_indicator_id);
-               $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
-          }elseif($request->filled(['region_id','country_id','indicator_id','sub_indicator_id'])){
-               $mapQuery->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->sub_indicator_id);
-               $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
-          }elseif($request->filled(['region_id', 'indicator_id', 'sub_indicator_id'])){
-               $mapQuery->where('c.parent_id',$request->region_id)->where('c.level',1)->where('cd.indicator_id',$request->sub_indicator_id);
-               $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.id',$request->region_id)->first();
-          }elseif($request->filled(['region_id','country_id','sub_country_id','indicator_id'])){
-               $mapQuery->where('c.geocode',$request->sub_country_id)->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->indicator_id);
-               $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
-          }elseif($request->filled(['region_id', 'country_id', 'indicator_id'])){
-               $mapQuery->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->indicator_id);
-               $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.country_code',$request->country_id)->first();
-          }elseif($request->filled(['region_id','indicator_id'])){
-               $mapQuery->where('c.parent_id',$request->region_id)->where('c.level',1)->where('cd.indicator_id',$request->indicator_id);
-               $parent = $parentQuery->select('c.id','c.level','c.country as title','c.country_code as geo_code','c.latitude','c.longitude')->where('c.id',$request->region_id)->first();
-          }elseif($request->filled(['indicator_id','sub_indicator_id'])){
-               $mapQuery->where('c.level',1)->where('cd.indicator_id',$request->sub_indicator_id);
-               $parent = null;
-          }elseif($request->filled('indicator_id')){
-               $mapQuery->where('c.level',1)->where('cd.indicator_id',$request->indicator_id);
-               $parent = null;
-          }
-
-          $map = $mapQuery->where('cd.year',$year)->get();
-
-          //Color Data
-          if(count($map)>0){
-               if($request->filled('sub_country_id') || $request->filled('country_id')){
-                    $colors = CategoryColor::select('country_leg_col','subcountry_leg_col')->where('subcountry_leg_col',$map[0]->country_color)->first();
-                    $mainColor = $colors->country_leg_col;
-                    
-                    $category_color = CategoryColor::select('subcountry_col_order as level','subcountry_leg_col as color')->where('country_leg_col',$mainColor)->get();     
-               }else{
-                    $category_color = CategoryColor::select('country_col_order as level','country_leg_col as color')->distinct()->get();
+               //Color Data
+               if(count($map)>0){
+                    if($request->filled('sub_country_id') || $request->filled('country_id')){
+                         $colors = CategoryColor::select('country_leg_col','subcountry_leg_col')->where('subcountry_leg_col',$map[0]->country_color)->first();
+                         $mainColor = $colors->country_leg_col;
+                         
+                         $category_color = CategoryColor::select('subcountry_col_order as level','subcountry_leg_col as color')->where('country_leg_col',$mainColor)->get();     
+                    }else{
+                         $category_color = CategoryColor::select('country_col_order as level','country_leg_col as color')->distinct()->get();
+                    }
                }
-          }
 
-          return response()->json([
-               'success'=>true,
-               'parent'=>$parent,
-               'color'=>isset($category_color) ? $category_color:[],
-               'project'=>$projects,
-               'count'=>count($map),
-               'data'=>$map
-          ]);
-    }
+               return response()->json([
+                    'success'=>true,
+                    'parent'=>$parent,
+                    'color'=>isset($category_color) ? $category_color:[],
+                    'project'=>$projects,
+                    'count'=>count($map),
+                    'data'=>$map
+               ]);
+     }
 
-    //Indicator Data
+     //Indicator Data
      public function indicatorScore(Request $request){
           $validator = Validator::make($request->all(),[
                'region_id'=>'nullable|integer',
@@ -290,7 +290,7 @@ class AllAPIController extends Controller
           }else{
                $indicators = Indicator::select('id','variablename as title')->where('level',0)->get();
           }
-                
+               
           $indicatorsScore = [];
           
           foreach($indicators as $indicator){
@@ -325,23 +325,23 @@ class AllAPIController extends Controller
      //Country Subcountry Score
      public function countryScore(Request $request){
           $validator = Validator::make($request->all(),[
-			'region_id'=>'nullable|integer',
-			'country_id'=>'nullable|string',
-			'sub_country_id'=>'nullable|string',
-			'year'=>'nullable|integer',
-			'indicator_id'=>'required|integer',
-			'sub_indicator_id'=>'nullable|integer',
-			'order'=>'nullable|string'
-		]);
-		
-		if($validator->fails()){
-			return response()->json(['errors'=>$validator->errors()]);
-		}
-		
-		//Set Year if Choose
-		$year = $request->year ?? 2023;
+               'region_id'=>'nullable|integer',
+               'country_id'=>'nullable|string',
+               'sub_country_id'=>'nullable|string',
+               'year'=>'nullable|integer',
+               'indicator_id'=>'required|integer',
+               'sub_indicator_id'=>'nullable|integer',
+               'order'=>'nullable|string'
+          ]);
+          
+          if($validator->fails()){
+               return response()->json(['errors'=>$validator->errors()]);
+          }
+          
+          //Set Year if Choose
+          $year = $request->year ?? 2023;
           $order = $request->order ?? 'DESC';
-		
+          
           if($request->filled('sub_country_id') || $request->filled('country_id')){
                $table = 'sub_countries';
                $dataTable = 'sub_country_data';
@@ -356,8 +356,8 @@ class AllAPIController extends Controller
                $select = ['c.id','c.country as title','c.country_code as geo_code','cd.country_score','c.parent_id'];
           }
 
-		//Parent Country if there is any
-		$parentQuery = DB::table('countries as c')->select('id','country as title');
+          //Parent Country if there is any
+          $parentQuery = DB::table('countries as c')->select('id','country as title');
           $countryScore = DB::table($table.' as c')->join($dataTable.' as cd',$joinFirstColumn,'=',$joinSecondColumn)->select($select);
 
           if($request->filled(['region_id','country_id','sub_country_id','indicator_id','sub_indicator_id'])){
@@ -385,37 +385,37 @@ class AllAPIController extends Controller
                $countryScore->where('c.level',1)->where('cd.indicator_id',$request->indicator_id);
                $parent = null;
           }
-		
+          
           $results = $countryScore->where('cd.year',$year)->orderBy('country_score',$order)->get();
 
-		return response()->json([
-			'status'=>true,
-			'count'=>count($results),
-			'parent'=>$parent,
-			'data'=>$results
-		]);	
+          return response()->json([
+               'status'=>true,
+               'count'=>count($results),
+               'parent'=>$parent,
+               'data'=>$results
+          ]);	
      }
 
      //Train Graph 
      public function trainGraph(Request $request){
           $validator = Validator::make($request->all(),[
-			'region_id'=>'nullable|integer',
-			'country_id'=>'nullable|string',
-			'sub_country_id'=>'nullable|string',
-			'indicator_id'=>'required|integer',
-			'sub_indicator_id'=>'nullable|integer',
+               'region_id'=>'nullable|integer',
+               'country_id'=>'nullable|string',
+               'sub_country_id'=>'nullable|string',
+               'indicator_id'=>'required|integer',
+               'sub_indicator_id'=>'nullable|integer',
                'from'=>'required|integer',
                'to'=>'required|integer',
-		]);
-		
-		if($validator->fails()){
-			return response()->json(['errors'=>$validator->errors()]);
-		}
-		
-		$year = $request->year ?? 2023;
+          ]);
+          
+          if($validator->fails()){
+               return response()->json(['errors'=>$validator->errors()]);
+          }
+          
+          $year = $request->year ?? 2023;
           $from = $request->from;
           $to = $request->to;
-		
+          
           if($request->filled('sub_country_id') || $request->filled('country_id')){
                $table = 'sub_countries';
                $dataTable = 'sub_country_data';
@@ -432,7 +432,7 @@ class AllAPIController extends Controller
                $select = ['c.id','c.country as title','c.country_code as geo_code','cd.country_score','cd.year'];
           }
 
-		//Parent Country if there is any
+          //Parent Country if there is any
           $countryQuery = DB::table($table.' as c')->join($dataTable.' as cd',$joinFirstColumn,'=',$joinSecondColumn)->select($select);
 
           if($request->filled(['region_id','country_id','sub_country_id','indicator_id','sub_indicator_id'])){
@@ -452,7 +452,7 @@ class AllAPIController extends Controller
           }elseif($request->filled('indicator_id')){
                $countryQuery->where('cd.indicator_id',$request->indicator_id);
           }
-		
+          
           // $results = $countryQuery->get();
           $results = [];
 
@@ -466,11 +466,11 @@ class AllAPIController extends Controller
                $results[$i] = $result;
           }
 
-		return response()->json([
-			'success'=>true,
-			'data'=>$results
-		]);
-	}
+          return response()->json([
+               'success'=>true,
+               'data'=>$results
+          ]);
+     }
 
      //Summary API 
      public function summary(Request $request){
@@ -619,7 +619,7 @@ class AllAPIController extends Controller
           $indicatorQuery = Indicator::query();
           $indicatorQuery->select('id','variablename as title');
           if($request->filled('indicator_id')){
-              if($request->indicator_id == 1){
+          if($request->indicator_id == 1){
                     $indicatorQuery->where('level',0)->whereNot('variablename','Overall Score')->where('company_id',1);
                     $selectField = 'indicator_id';
                } else{
