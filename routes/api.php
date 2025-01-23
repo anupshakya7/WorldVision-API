@@ -23,16 +23,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+//World Vision
+//Check User
+Route::post('/check-user',[APIAllAPIController::class,'checkUser']);
+
 Route::middleware('api.token:worldvision')->group(function(){
-    //World Vision
     //Get Country and SubCountry
     Route::get('/get-country-sub-country',[ProjectController::class,'filterCountrySubCountry'])->name('getCountrySubCountry');
 
     //Get Indicator
     Route::get('/get-indicator',[ProjectController::class,'filterIndicator'])->name('getIndicator');
-
-    //Check User
-    Route::post('/check-user',[APIAllAPIController::class,'checkUser']);
 
     //Parent Data -> Country Data
     Route::get('parent-data',[APIAllAPIController::class,'parentData']);
