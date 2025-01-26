@@ -360,4 +360,34 @@ class AllAPIController extends Controller
             ]);
         }
     }
+
+    //Acled API
+    //Early Warning Factors
+    public function acledMapEarlyWarnFactor(Request $request){
+        $validatedData = Validator::make($request->all(),[
+            'event_type'=>'nullable|string',
+            'year'=>'nullable'
+        ]);
+
+        if($validatedData->fails()){
+            return response()->json($validatedData->errors(),404);
+        }
+
+        $year = $request->year ?? 2024;
+
+        $mapAcledQuery = DB::connection('mysql2')->table('aclied')->select(['event_date','event_type','fatalities','notes']);
+
+        if($request->filled('event_type')){
+            $mapAcledQuery->where('event_type',$request->event_type);
+        }
+
+        $result = $mapAcledQuery->where('year',$year)->get();
+
+        return response()->json([
+            'success'=>true,
+            'count'=>count($result),
+            'data'=>$result
+        ]);
+    }
+
 }

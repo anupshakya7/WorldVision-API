@@ -79,4 +79,9 @@ Route::middleware('api.token:ati')->group(function(){
 
     //Risk Outlook
     Route::get('risk-outlook',[AllAPIController::class,'riskOutlookAPI']);
+
+    //ATI ACLED API
+    Route::prefix('acled')->group(function(){
+        Route::get('map',[AllAPIController::class,'acledMapEarlyWarnFactor']);
+    });
 });

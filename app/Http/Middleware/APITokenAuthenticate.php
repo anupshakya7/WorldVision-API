@@ -20,7 +20,7 @@ class APITokenAuthenticate
     {
         $token = $request->bearerToken();
         $type = $type == 'worldvision' ? 1 : 2;
-
+        
         if(!$token){
             return response()->json([
                 'success'=>false,
