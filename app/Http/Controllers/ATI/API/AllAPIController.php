@@ -438,7 +438,8 @@ class AllAPIController extends Controller
         if($type == 'event'){
             foreach($weeklyDates as $weekDate){
                 $chartCloneData = clone $chartDataQuery;
-                $result[$weekDate['startdate'].'-'.$weekDate['enddate']] = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$weekDate['enddate']])->get();
+                $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$weekDate['enddate']])->count();
+                $result[$weekDate['startdate'].'|'.$weekDate['enddate']] = $data;
             }
         }
 
