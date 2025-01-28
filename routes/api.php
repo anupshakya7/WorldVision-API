@@ -82,6 +82,10 @@ Route::middleware('api.token:ati')->group(function(){
 
     //ATI ACLED API
     Route::prefix('acled')->group(function(){
+        //Map
         Route::get('map',[AllAPIController::class,'acledMapEarlyWarnFactor']);
+        
+        //Weekly Chart Event and Fatalities
+        Route::get('weekly-chart',[AllAPIController::class,'chartEventsFatalities']);
     });
 });

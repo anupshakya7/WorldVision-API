@@ -4,6 +4,7 @@ namespace App\Http\Controllers\ATI\API;
 
 use App\Helpers\DomainPercentage;
 use App\Http\Controllers\Controller;
+use App\Models\Acled\Acled;
 use App\Models\Admin\Country;
 use App\Models\Admin\CountryData;
 use App\Models\Admin\CountryDomainData;
@@ -365,29 +366,83 @@ class AllAPIController extends Controller
     //Early Warning Factors
     public function acledMapEarlyWarnFactor(Request $request){
         $validatedData = Validator::make($request->all(),[
-            'event_type'=>'nullable|string',
-            'year'=>'nullable'
+            'event_type'=>'nullable|string'
         ]);
 
         if($validatedData->fails()){
             return response()->json($validatedData->errors(),404);
         }
 
-        $year = $request->year ?? 2024;
+        $latestyear =  Acled::orderBy('event_date','DESC')->first('event_date');
+        $endYear = $latestyear->event_date;
+        $oneYearEarly =  Carbon::parse($latestyear->event_date)->subYear()->format('Y-m-d');
 
-        $mapAcledQuery = DB::connection('mysql2')->table('aclied')->select(['event_date','event_type','fatalities','notes']);
+        $mapAcledQuery = DB::connection('mysql2')->table('aclied')->select(['event_date','event_type','fatalities','latitude','longitude','notes']);
 
         if($request->filled('event_type')){
             $mapAcledQuery->where('event_type',$request->event_type);
         }
 
-        $result = $mapAcledQuery->where('year',$year)->get();
+        $cacheKey = 'map_data_'.md5($request->event_type.$oneYearEarly.$endYear);
+
+        $result = cache()->remember($cacheKey,60*60*24,function() use($mapAcledQuery,$oneYearEarly,$endYear){
+            return $mapAcledQuery->whereBetween('event_date',[$oneYearEarly,$endYear])->get();
+        });
 
         return response()->json([
             'success'=>true,
             'count'=>count($result),
             'data'=>$result
         ]);
+    }
+
+    // Weekly Chart for Events and Fatalities
+    public function chartEventsFatalities(Request $request){
+        $validatedData = Validator::make($request->all(),[
+            'type'=>'required|string'
+        ]);
+
+        if($validatedData->fails()){
+            return response()->json($validatedData->errors(),404);
+        }
+
+        $type = $request->type;
+
+        //Starting Date
+        $latestData = Acled::select('event_date')->orderBy('event_date','DESC')->first();
+        
+        //Start Date and End Date
+        $startdate = Carbon::parse($latestData->event_date)->subYear();
+        $enddate = Carbon::parse($latestData->event_date);
+
+        //Weekly Date
+        $weeklyDates = [];
+
+        //Adding 7 days at a time
+        while($startdate < $enddate){
+            $nextEndDate = $startdate->copy()->addWeek();
+
+            //Add to the weekly dates array
+            $weeklyDates[] = [
+                'startdate'=>$startdate->format('Y-m-d'),
+                'enddate'=>$nextEndDate->format('Y-m-d'),
+            ];
+            
+            //Start Date to Pervious End Date
+            $startdate = $nextEndDate;
+        }
+
+        $chartDataQuery = Acled::query();
+        $result = [];
+
+        if($type == 'event'){
+            foreach($weeklyDates as $weekDate){
+                $chartCloneData = clone $chartDataQuery;
+                $result[$weekDate['startdate'].'-'.$weekDate['enddate']] = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$weekDate['enddate']])->get();
+            }
+        }
+
+        return $result;
     }
 
 }
