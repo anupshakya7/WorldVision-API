@@ -377,7 +377,7 @@ class AllAPIController extends Controller
         $endYear = $latestyear->event_date;
         $oneYearEarly =  Carbon::parse($latestyear->event_date)->subYear()->format('Y-m-d');
 
-        $mapAcledQuery = DB::connection('mysql2')->table('aclied')->select(['event_date','event_type','fatalities','latitude','longitude','notes']);
+        $mapAcledQuery = Acled::select(['event_date','event_type','fatalities','latitude','longitude','notes']);
 
         if($request->filled('event_type')){
             $mapAcledQuery->where('event_type',$request->event_type);
@@ -434,6 +434,9 @@ class AllAPIController extends Controller
 
         $chartDataQuery = Acled::query();
         $result = [];
+        $eventTypes = Acled::select('event_type')->distinct()->get();
+        $individualEvent = [];
+        $totalEvent = [];
 
         if($type == 'event'){
             foreach($weeklyDates as $key=>$weekDate){
@@ -441,8 +444,15 @@ class AllAPIController extends Controller
                 $enddatemain = $key+1 == count($weeklyDates) ? $weekDate['enddate'] : $enddate->subDay()->format('Y-m-d');;
 
                 $chartCloneData = clone $chartDataQuery;
+                foreach($eventTypes as $eventType){
+                    $chartIndividualCloneData = clone $chartDataQuery;
+                    $data = $chartIndividualCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->where('event_type',$eventType->event_type)->count();
+                    $individualEvent[$eventType->event_type] = $data;
+                }
                 $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->count();
-                $result[$weekDate['startdate'].'|'.$enddatemain] = $data;
+                $totalEvent['Total'] = $data;
+                $allData = array_merge($individualEvent,$totalEvent);
+                $result[$weekDate['startdate'].'|'.$enddatemain] = $allData;
             }
         }
 
@@ -470,75 +480,4 @@ class AllAPIController extends Controller
             ]);
         }
     }
-
-    //Testing with new method
-    //  public function chartEventsFatalities(Request $request){
-    //     $validatedData = Validator::make($request->all(),[
-    //         'type'=>'required|string'
-    //     ]);
-
-    //     if($validatedData->fails()){
-    //         return response()->json($validatedData->errors(),404);
-    //     }
-
-    //     $type = $request->type;
-
-    //     //Starting Date
-    //     $latestData = Acled::select('event_date')->orderBy('event_date','DESC')->first();
-        
-    //     //Start Date and End Date
-    //     $startdate = Carbon::parse($latestData->event_date)->subYear();
-    //     $enddate = Carbon::parse($latestData->event_date);
-
-    //     //SQL query to count events per week
-    //     $eventsData = Acled::selectRaw('
-    //             YEAR(event_date) AS year,
-    //             WEEK(event)
-    //         ')
-
-    //     //Weekly Date
-    //     $weeklyDates = [];
-
-    //     //Adding 7 days at a time
-    //     while($startdate < $enddate){
-    //         $nextEndDate = $startdate->copy()->addWeek();
-
-    //         //Add to the weekly dates array
-    //         $weeklyDates[] = [
-    //             'startdate'=>$startdate->format('Y-m-d'),
-    //             'enddate'=>$nextEndDate->format('Y-m-d'),
-    //         ];
-            
-    //         //Start Date to Pervious End Date
-    //         $startdate = $nextEndDate;
-    //     }
-
-    //     $chartDataQuery = Acled::query();
-    //     $result = [];
-
-    //     if($type == 'event'){
-    //         foreach($weeklyDates as $key=>$weekDate){
-    //             $enddate = Carbon::parse($weekDate['enddate']);
-    //             $enddatemain = $key+1 == count($weeklyDates) ? $weekDate['enddate'] : $enddate->subDay()->format('Y-m-d');;
-
-    //             $chartCloneData = clone $chartDataQuery;
-    //             $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->count();
-    //             $result[$weekDate['startdate'].'|'.$enddatemain] = $data;
-    //         }
-    //     }
-
-
-    //     if($result){
-    //         return response()->json([
-    //             'success'=>true,
-    //             'data'=>$result
-    //         ]);
-    //     }else{
-    //         return response()->json([
-    //             'success'=>false,
-    //             'message'=>'Data Not Found'
-    //         ]);
-    //     }
-    // }
-
 }
