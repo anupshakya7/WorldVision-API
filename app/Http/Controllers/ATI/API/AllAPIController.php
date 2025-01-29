@@ -436,14 +436,109 @@ class AllAPIController extends Controller
         $result = [];
 
         if($type == 'event'){
-            foreach($weeklyDates as $weekDate){
+            foreach($weeklyDates as $key=>$weekDate){
+                $enddate = Carbon::parse($weekDate['enddate']);
+                $enddatemain = $key+1 == count($weeklyDates) ? $weekDate['enddate'] : $enddate->subDay()->format('Y-m-d');;
+
                 $chartCloneData = clone $chartDataQuery;
-                $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$weekDate['enddate']])->count();
-                $result[$weekDate['startdate'].'|'.$weekDate['enddate']] = $data;
+                $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->count();
+                $result[$weekDate['startdate'].'|'.$enddatemain] = $data;
             }
         }
 
-        return $result;
+        if($type == 'fatalities'){
+            foreach($weeklyDates as $key=>$weekDate){
+                $enddate = Carbon::parse($weekDate['enddate']);
+                $enddatemain = $key+1 == count($weeklyDates) ? $weekDate['enddate'] : $enddate->subDay()->format('Y-m-d');;
+
+                $chartCloneData = clone $chartDataQuery;
+                $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->sum('fatalities');
+                $result[$weekDate['startdate'].'|'.$enddatemain] = (int) $data;
+            }
+        }
+
+
+        if($result){
+            return response()->json([
+                'success'=>true,
+                'data'=>$result
+            ]);
+        }else{
+            return response()->json([
+                'success'=>false,
+                'message'=>'Data Not Found'
+            ]);
+        }
     }
+
+    //Testing with new method
+    //  public function chartEventsFatalities(Request $request){
+    //     $validatedData = Validator::make($request->all(),[
+    //         'type'=>'required|string'
+    //     ]);
+
+    //     if($validatedData->fails()){
+    //         return response()->json($validatedData->errors(),404);
+    //     }
+
+    //     $type = $request->type;
+
+    //     //Starting Date
+    //     $latestData = Acled::select('event_date')->orderBy('event_date','DESC')->first();
+        
+    //     //Start Date and End Date
+    //     $startdate = Carbon::parse($latestData->event_date)->subYear();
+    //     $enddate = Carbon::parse($latestData->event_date);
+
+    //     //SQL query to count events per week
+    //     $eventsData = Acled::selectRaw('
+    //             YEAR(event_date) AS year,
+    //             WEEK(event)
+    //         ')
+
+    //     //Weekly Date
+    //     $weeklyDates = [];
+
+    //     //Adding 7 days at a time
+    //     while($startdate < $enddate){
+    //         $nextEndDate = $startdate->copy()->addWeek();
+
+    //         //Add to the weekly dates array
+    //         $weeklyDates[] = [
+    //             'startdate'=>$startdate->format('Y-m-d'),
+    //             'enddate'=>$nextEndDate->format('Y-m-d'),
+    //         ];
+            
+    //         //Start Date to Pervious End Date
+    //         $startdate = $nextEndDate;
+    //     }
+
+    //     $chartDataQuery = Acled::query();
+    //     $result = [];
+
+    //     if($type == 'event'){
+    //         foreach($weeklyDates as $key=>$weekDate){
+    //             $enddate = Carbon::parse($weekDate['enddate']);
+    //             $enddatemain = $key+1 == count($weeklyDates) ? $weekDate['enddate'] : $enddate->subDay()->format('Y-m-d');;
+
+    //             $chartCloneData = clone $chartDataQuery;
+    //             $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->count();
+    //             $result[$weekDate['startdate'].'|'.$enddatemain] = $data;
+    //         }
+    //     }
+
+
+    //     if($result){
+    //         return response()->json([
+    //             'success'=>true,
+    //             'data'=>$result
+    //         ]);
+    //     }else{
+    //         return response()->json([
+    //             'success'=>false,
+    //             'message'=>'Data Not Found'
+    //         ]);
+    //     }
+    // }
 
 }
