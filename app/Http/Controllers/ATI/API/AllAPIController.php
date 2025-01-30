@@ -366,28 +366,44 @@ class AllAPIController extends Controller
     //Early Warning Factors
     public function acledMapEarlyWarnFactor(Request $request){
         $validatedData = Validator::make($request->all(),[
-            'event_type'=>'nullable|string'
+            'event_type'=>'nullable|string',
+            'countrycode'=>'required'
         ]);
 
         if($validatedData->fails()){
             return response()->json($validatedData->errors(),404);
         }
 
+        $countries = Country::where('country_code',$request->countrycode)->pluck('country')->first();
+        
         $latestyear =  Acled::orderBy('event_date','DESC')->first('event_date');
         $endYear = $latestyear->event_date;
         $oneYearEarly =  Carbon::parse($latestyear->event_date)->subYear()->format('Y-m-d');
 
-        $mapAcledQuery = Acled::select(['event_date','event_type','fatalities','latitude','longitude','notes']);
+        $mapAcledQuery = Acled::select(['event_date','event_type','fatalities','country','latitude','longitude','notes'])->where('country',$countries)->whereIn('event_type',['Protests','Riots','Violence against civilians']);
 
         if($request->filled('event_type')){
             $mapAcledQuery->where('event_type',$request->event_type);
         }
 
-        $cacheKey = 'map_data_'.md5($request->event_type.$oneYearEarly.$endYear);
 
-        $result = cache()->remember($cacheKey,60*60*24,function() use($mapAcledQuery,$oneYearEarly,$endYear){
-            return $mapAcledQuery->whereBetween('event_date',[$oneYearEarly,$endYear])->get();
-        });
+        $result = $mapAcledQuery->whereBetween('event_date',[$oneYearEarly,$endYear])->get();
+        
+        // $cacheKey = 'map_data_'.md5($request->event_type.$oneYearEarly.$endYear);
+
+        // $result = cache()->remember($cacheKey,60*60*24,function() use($mapAcledQuery,$oneYearEarly,$endYear){
+        //     return $mapAcledQuery->whereBetween('event_date',[$oneYearEarly,$endYear])->get();
+        // });
+
+        // $result = [];
+        // cache()->remember($cacheKey,60*60*24,function() use($mapAcledQuery,$oneYearEarly,$endYear,&$result){
+        //     $mapAcledQuery->whereBetween('event_date',[$oneYearEarly,$endYear])
+        //         ->chunk(1000,function($acledChunk) use(&$result){
+        //             foreach($acledChunk as $acled){
+        //                 $result[] = $acled;
+        //             }
+        //         });
+        // });
 
         return response()->json([
             'success'=>true,
@@ -399,13 +415,18 @@ class AllAPIController extends Controller
     // Weekly Chart for Events and Fatalities
     public function chartEventsFatalities(Request $request){
         $validatedData = Validator::make($request->all(),[
-            'type'=>'required|string'
+            'type'=>'required|string',
+            'countrycode'=>'required'
         ]);
 
         if($validatedData->fails()){
             return response()->json($validatedData->errors(),404);
         }
 
+        //Fetch Country Name From its Country Code
+        $countries = Country::where('country_code',$request->countrycode)->pluck('country')->first();
+
+        //Type Event or Fatalities
         $type = $request->type;
 
         //Starting Date
@@ -432,9 +453,10 @@ class AllAPIController extends Controller
             $startdate = $nextEndDate;
         }
 
-        $chartDataQuery = Acled::query();
+        $chartDataQuery = Acled::where('country',$countries);
         $result = [];
-        $eventTypes = Acled::select('event_type')->distinct()->get();
+        // $eventTypes = Acled::select('event_type')->distinct()->get();
+        $eventTypes = ['Protests','Riots','Violence against civilians'];
         $individualEvent = [];
         $totalEvent = [];
 
@@ -446,11 +468,12 @@ class AllAPIController extends Controller
                 $chartCloneData = clone $chartDataQuery;
                 foreach($eventTypes as $eventType){
                     $chartIndividualCloneData = clone $chartDataQuery;
-                    $data = $chartIndividualCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->where('event_type',$eventType->event_type)->count();
-                    $individualEvent[$eventType->event_type] = $data;
+                    $data = $chartIndividualCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->where('event_type',$eventType)->count();
+                    $individualEvent[$eventType] = $data;
                 }
-                $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->count();
-                $totalEvent['Total'] = $data;
+                $total = array_sum($individualEvent);
+                // $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->count();
+                $totalEvent['Total'] = $total;
                 $allData = array_merge($individualEvent,$totalEvent);
                 $result[$weekDate['startdate'].'|'.$enddatemain] = $allData;
             }
