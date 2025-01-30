@@ -492,7 +492,13 @@ class AllAPIController extends Controller
 
                 $chartCloneData = clone $chartDataQuery;
                 $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->sum('fatalities');
-                $result[$weekDate['startdate'].'|'.$enddatemain] = (int) $data;
+
+                $year = Carbon::parse($enddatemain)->format('Y');
+                $month = Carbon::parse($enddatemain)->format('M');
+                $day = Carbon::parse($enddatemain)->format('d');
+                
+                // $result[$weekDate['startdate'].'|'.$enddatemain] = (int) $data;
+                $result[$month.' '.$day.', '.$year] = (int) $data;
             }
         }
 
