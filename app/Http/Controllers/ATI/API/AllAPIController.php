@@ -475,7 +475,13 @@ class AllAPIController extends Controller
                 // $data = $chartCloneData->whereBetween('event_date',[$weekDate['startdate'],$enddatemain])->count();
                 $totalEvent['Total'] = $total;
                 $allData = array_merge($individualEvent,$totalEvent);
-                $result[$weekDate['startdate'].'|'.$enddatemain] = $allData;
+
+                $year = Carbon::parse($enddatemain)->format('Y');
+                $month = Carbon::parse($enddatemain)->format('M');
+                $day = Carbon::parse($enddatemain)->format('d');
+
+                // $result[$weekDate['startdate'].'|'.$enddatemain] = $allData;
+                $result[$month.' '.$day.', '.$year] = $allData;
             }
         }
 
