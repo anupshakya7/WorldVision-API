@@ -502,7 +502,7 @@ class AllAPIController extends Controller
                $dataTable = 'country_data';
                $joinFirstColumn ='c.country_code';
                $joinSecondColumn = 'cd.countrycode';
-               $select = ['c.id','c.parent_id','c.country as title','c.country_code as geo_code','cd.year as data_year','cd.country_score'];
+               $select = ['c.id','c.parent_id','c.country as title','c.country_code as geo_code','cd.year as data_year','cd.country_score','cd.remarks as statements'];
           }
 
           //Map Data
@@ -553,6 +553,8 @@ class AllAPIController extends Controller
                'region_id' => 'nullable|integer',
                'country_id' => 'nullable',
                'sub_country_id' => 'nullable',
+               'indicator_id'=>'nullable|integer',
+               'sub_indicator_id'=>'nullable|integer',
                'year' => 'nullable|integer'
           ]);
      
@@ -580,13 +582,29 @@ class AllAPIController extends Controller
           //Map Data
           $downloadQuery = DB::table($table." as c")->join($dataTable.' as cd',$joinFirstColumn,'=',$joinSecondColumn)->join('indicators as i','cd.indicator_id','=','i.id')->select($select);
 
-
-          if($request->filled(['region_id','country_id','sub_country_id'])){
-               $downloadQuery->where('c.geocode',$request->sub_country_id)->where('c.countrycode',$request->country_id);
+            //Download Data
+            if($request->filled(['region_id','country_id','sub_country_id','indicator_id','sub_indicator_id'])){
+                $downloadQuery->where('c.countrycode',$request->country_id)->where('c.geocode',$request->sub_country_id)->where('cd.indicator_id',$request->sub_indicator_id);
+          }elseif($request->filled(['region_id','country_id','indicator_id','sub_indicator_id'])){
+                $downloadQuery->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->sub_indicator_id);
+          }elseif($request->filled(['region_id', 'indicator_id', 'sub_indicator_id'])){
+                $downloadQuery->where('c.parent_id',$request->region_id)->where('cd.indicator_id',$request->sub_indicator_id);
+          }elseif($request->filled(['region_id','country_id','sub_country_id','indicator_id'])){
+                $downloadQuery->where('c.countrycode',$request->country_id)->where('c.geocode',$request->sub_country_id)->where('cd.indicator_id',$request->indicator_id);
+          }elseif($request->filled(['region_id', 'country_id', 'indicator_id'])){
+                $downloadQuery->where('c.countrycode',$request->country_id)->where('cd.indicator_id',$request->indicator_id);
+          }elseif($request->filled(['region_id','indicator_id'])){
+                $downloadQuery->where('c.parent_id',$request->region_id)->where('cd.indicator_id',$request->indicator_id);
+          }elseif($request->filled(['indicator_id','sub_indicator_id'])){
+                $downloadQuery->where('cd.indicator_id',$request->sub_indicator_id);
+          }elseif($request->filled('indicator_id')){
+                $downloadQuery->where('cd.indicator_id',$request->indicator_id); 
+          }elseif($request->filled(['region_id','country_id','sub_country_id'])){
+                $downloadQuery->where('c.geocode',$request->sub_country_id)->where('c.countrycode',$request->country_id);
           }elseif($request->filled(['region_id','country_id'])){
-               $downloadQuery->where('c.countrycode',$request->country_id);
+                $downloadQuery->where('c.countrycode',$request->country_id);
           }elseif($request->filled(['region_id'])){
-               $downloadQuery->where('c.parent_id',$request->region_id);
+                $downloadQuery->where('c.parent_id',$request->region_id);
           }
 
           $downloadData = $downloadQuery->where('cd.year',$year)->get();
