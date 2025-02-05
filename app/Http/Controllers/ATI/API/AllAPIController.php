@@ -64,7 +64,7 @@ class AllAPIController extends Controller
 
         if($request->filled('countrycode')){
             //Domain Data
-            $countryScore = CountryData::where('countrycode',$request->countrycode)->where('indicator_id',87)->where('year',$year)->pluck('banded')->first();
+            $countryScore = round(CountryData::where('countrycode',$request->countrycode)->where('indicator_id',87)->where('year',$year)->pluck('banded')->first(),2);
             $domains = Indicator::where('level',0)->where('company_id',2)->whereNotIn('variablename',['Overall Score','ATI Governance'])->get();
             $domainResult = [];
             $domainTrendResult10Year = [];
@@ -73,13 +73,13 @@ class AllAPIController extends Controller
             foreach($domains as $domain){
                 for($i=(Carbon::now()->year-11);$i<Carbon::now()->year-1;$i++){
                     $score= CountryData::where('indicator_id',$domain->id)->where('countrycode',$request->countrycode)->where('year',$i)->pluck('banded')->first();
-                    $domainTrendResult10Year[$i] = $score ? $score:0;
+                    $domainTrendResult10Year[$i] = $score ? round($score,2):0;
                 }
                 $domainResult = CountryData::select('countrycode','year','banded as score')->where('indicator_id',$domain->id)->where('countrycode',$request->countrycode)->where('year',$year)->latest()->first();
                 $firstYearResult = CountryData::select('countrycode','year','banded as score')->where('indicator_id',$domain->id)->where('countrycode',$request->countrycode)->where('year',2013)->latest()->first();
 
                 //Domain Percentage Calculation
-                $domain_percentage_change = DomainPercentage::domainCalculation($firstYearResult->score,$domainResult->score);
+                $domain_percentage_change = round(DomainPercentage::domainCalculation($firstYearResult->score,$domainResult->score),2);
                 
                 //Domain Type according to Domain Percentage
                 $domainType = $this->domainType($domain_percentage_change);
@@ -87,7 +87,7 @@ class AllAPIController extends Controller
                 $domainMainResult[$domain->variablename] = [
                     'countrycode'=>isset($domainResult->countrycode)?$domainResult->countrycode:null,
                     'year'=>isset($domainResult->year)?$domainResult->year:null,
-                    'score'=>isset($domainResult->score)?$domainResult->score:null,
+                    'score'=>isset($domainResult->score)?round($domainResult->score,2):null,
                     // 'domain_result'=>isset($domainResult->domain_result)?$domainResult->domain_result:null,
                     'trend_result'=>isset($domainType)?$domainType:null,
                     'trend_percentage'=>isset($domain_percentage_change)?$domain_percentage_change:null,
@@ -105,7 +105,7 @@ class AllAPIController extends Controller
                 $voiceOfPeopleResult[$key] = [
                     "countrycode"=>$request->countrycode,
                     "year"=>$year,
-                    "score"=>$indicatorScore >0  ? ($indicatorScore/10)*100:0
+                    "score"=>$indicatorScore >0  ? round(($indicatorScore/10)*100,2):0
                 ];
             }
 
@@ -116,7 +116,6 @@ class AllAPIController extends Controller
                 'voice_of_people'=>$voiceOfPeopleResult
             ]);
         }
-        
     }
 
     //Check Domain Type according to Percentage
@@ -412,7 +411,7 @@ class AllAPIController extends Controller
         ]);
     }
 
-    // Weekly Chart for Events and Fatalities
+    //Weekly Chart for Events and Fatalities
     public function chartEventsFatalities(Request $request){
         $validatedData = Validator::make($request->all(),[
             'type'=>'required|string',
@@ -515,4 +514,5 @@ class AllAPIController extends Controller
             ]);
         }
     }
+
 }
