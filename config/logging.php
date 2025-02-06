@@ -51,6 +51,12 @@ return [
     */
 
     'channels' => [
+        'acled_data_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/acled_data.log'),
+            'level' => 'debug'
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],
