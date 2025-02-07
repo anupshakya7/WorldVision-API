@@ -150,7 +150,7 @@ class AcledDataFetch extends Command
                     $updateDatas = $response->json();
 
                     //Log the fetched data
-                    Log::channel('acled_data_log')->info('Fetched Data: ',$updateDatas);
+                    Log::channel('acled_data_log')->info('Fetched API Data For : '.$datesString.'. Count: '.$updateDatas['count']);
 
                     //Array for batch insert
                     $dataToInsert = [];
