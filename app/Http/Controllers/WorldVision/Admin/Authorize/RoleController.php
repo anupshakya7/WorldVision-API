@@ -106,6 +106,10 @@ class RoleController extends Controller
 
     //Assign Permission
     public function assignPermission(Request $request,Role $role){
+        $request->validate([
+            'permission'=>'required|exists:permissions,name'
+        ]);
+
         if($role->hasPermissionTo($request->permission)){
             return redirect()->back()->with('error','Permission exists.');
         }

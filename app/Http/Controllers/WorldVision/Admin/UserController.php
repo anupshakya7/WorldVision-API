@@ -119,6 +119,10 @@ class UserController extends Controller
     }
 
     public function assignRole(Request $request,User $user){
+        $request->validate([
+            'role'=>'required|exists:roles,name'
+        ]);
+
         $role = Role::findByName($request->role);
 
         if($user->hasRole($role)){
