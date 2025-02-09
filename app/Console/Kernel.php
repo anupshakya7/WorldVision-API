@@ -17,7 +17,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('fetch:acled-data')->everyMinute();
+        // $schedule->command('fetch:acled-data')->everyMinute();
+        $schedule->command('fetch:acled-missing-data')->everyMinute();
         //$schedule->command('mail:test')->everyMinute();
     }
 
