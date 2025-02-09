@@ -8,12 +8,11 @@
 </head>
 <body>
     <h1>Error Notification</h1>
-    <p><strong>Error Message: </strong> {{$errorMessage}}</p>
-
     <div class="error-details">
         <p><strong>Context: </strong></p>
         <pre>{{$context}}</pre>
     </div>
+    <p><strong>Error Message: </strong> {{$errorMessage}}</p>
 
     <p>Regards,</p>
     <p>ATI</p>
