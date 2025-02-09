@@ -8,6 +8,7 @@ use App\Models\Admin\Country;
 use App\Models\Admin\Indicator;
 use App\Models\Admin\Project;
 use App\Models\User;
+use Doctrine\DBAL\Schema\Index;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -290,7 +291,14 @@ class AllAPIController extends Controller
           }else{
                $indicators = Indicator::select('id','variablename as title')->where('level',0)->get();
           }
-               
+
+          //Indicator Details
+          $indicatorId = $request->filled(['indicator_id','sub_indicator_id']) ? $request->sub_indicator_id : $request->indicator_id;
+          $indicatorLevel = $request->filled(['indicator_id','sub_indicator_id']) ? 1 : 0;
+
+          $indicatorDetails = Indicator::select('vardescription','varunits')->where('id',$indicatorId)->where('level',$indicatorLevel)->first();
+          //Indicator Details
+
           $indicatorsScore = [];
           
           foreach($indicators as $indicator){
@@ -318,6 +326,8 @@ class AllAPIController extends Controller
           return response()->json([
                'success'=>true,
                'parent'=>$parent,
+               'indicator_description'=>$indicatorDetails->vardescription,
+               'indicator_units'=>$indicatorDetails->varunits,
                'data'=>$indicatorsScore
           ]);
      }
