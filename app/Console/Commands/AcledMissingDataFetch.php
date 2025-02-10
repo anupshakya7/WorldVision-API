@@ -111,7 +111,9 @@ class AcledMissingDataFetch extends Command
                             'date'=>$datesString
                         ]);
 
-                        Mail::to('anupshk7@gmail.com')->send(new AcledErrorNotification(
+                        Mail::to('web@krizmatic.com')
+                        ->cc(['dev2@krizmatic.com','anupshk39@gmail.com'])
+                        ->send(new AcledErrorNotification(
                             'Error when inserting data batch',
                             Str::limit($e->getMessage(),500),
                             'Error when inserting data batch for '.$datesString
@@ -129,7 +131,9 @@ class AcledMissingDataFetch extends Command
                     'url'=>$fullUrl
                 ]);
 
-                Mail::to('anupshk7@gmail.com')->send(new AcledErrorNotification(
+                Mail::to('web@krizmatic.com')
+                ->cc(['dev2@krizmatic.com','anupshk39@gmail.com'])        
+                ->send(new AcledErrorNotification(
                     'Error making API request',
                     Str::limit($e->getMessage(),500),
                     $fullUrl
