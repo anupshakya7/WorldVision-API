@@ -9,11 +9,10 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class AcledErrorNotification extends Mailable
+class CountryDataErrorNotication extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $subject;
     public $errorMessage;
     public $context;
 
@@ -22,9 +21,8 @@ class AcledErrorNotification extends Mailable
      *
      * @return void
      */
-    public function __construct($subject,$errorMessage,$context=[])
+    public function __construct($errorMessage=[],$context=[])
     {
-        $this->subject = $subject;
         $this->errorMessage = $errorMessage;
         $this->context = $context;
     }
@@ -37,7 +35,7 @@ class AcledErrorNotification extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: $this->subject,
+            subject: 'Country Data Error Notication',
         );
     }
 
@@ -49,7 +47,7 @@ class AcledErrorNotification extends Mailable
     public function content()
     {
         return new Content(
-            view: 'mail.acled_notification',
+            view: 'mail.country_data_notification',
             with:[
                 'errorMessage'=>$this->errorMessage,
                 'context'=>$this->context

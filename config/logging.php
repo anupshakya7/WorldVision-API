@@ -57,6 +57,18 @@ return [
             'level' => 'debug'
         ],
 
+        'country_data_log' => [
+            'driver'=>'single',
+            'path' => storage_path('logs/country_data.log'),
+            'level' => 'debug'
+        ],
+
+        'sub_country_data_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/sub_country_data.log'),
+            'level' => 'debug'
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],

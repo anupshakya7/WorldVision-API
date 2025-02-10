@@ -32,7 +32,7 @@ class TestMail extends Command
     public function handle()
     {
         try{
-            Mail::to('anupshk7@gmail.com')->cc('dev2@krizmatic.com')->send(new AcledErrorNotification(
+            Mail::to('anupshk7@gmail.com')->cc('anupshk39@gmail.com')->send(new AcledErrorNotification(
                 'Test Mail',
                 'For Testing Purpose',
                 'onLY FOR TEsting'
