@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\WorldVision\Admin;
 
+use App\Helpers\PaginationHelper;
 use App\Http\Controllers\Controller;
 use App\Jobs\CountryCSVData;
 use App\Models\Admin\CategoryColor;
@@ -22,6 +23,7 @@ class CountryDataController extends Controller
     public function index()
     {
         $countriesData = CountryData::with(['indicator','country','user'])->filterWorldVisionData()->paginate(10);
+        $countriesData = PaginationHelper::addSerialNo($countriesData);
 
         return view('worldvision.admin.dashboard.country_data.index', compact('countriesData'));
     }
@@ -184,54 +186,29 @@ class CountryDataController extends Controller
 
         if($request->has('csv_file')){
             $csv = file($request->csv_file);
-            $chunks = array_chunk($csv,500);
+            $csvarray = array_map('str_getcsv',$csv);
+
+            //Header Start
             $header = [];
+            $header = $csvarray[0];
+            unset($csvarray[0]);
+            //Header End
+
             $batch = Bus::batch([])->dispatch();
+            $groupedData = [];
 
-            foreach($chunks as $key=>$chunk){
-                $data = array_map('str_getcsv',$chunk);
+            //Grouping Data through Country
+            foreach($csvarray as $row){
+                $countryCode = $row[1];
 
-                if($key == 0){
-                    $header = $data[0];
-                    unset($data[0]);
-                    $newHeader = ['country_cat','created_by','company_id'];
-                    $header = array_merge($header,$newHeader);
+                if(!isset($groupedData[$countryCode])){
+                    $groupedData[$countryCode] = [];
                 }
-            
-                $header = array_map(function($value){
-                    if($value == 'indicator'){
-                        return 'indicator_id';
-                    }
-                    return $value;
-                },$header);
+                $groupedData[$countryCode][] = $row;
+            }
 
-                //Replace Indicator with Indicator_Id
-                foreach($data as &$row){
-                    //Indicator
-                    $indicatorName = $row[0];
-                    $indicator = Indicator::where('variablename',$indicatorName)->pluck('id')->first();
-
-                    if($indicator){
-                        $row[0] = $indicator;
-                    }else{
-                        return redirect()->back()->with('error',$indicatorName.' Not Found');
-                    }                    
-
-                    //Color
-                    $color = $row[5];
-                    $colorCategory = CategoryColor::where('subcountry_leg_col',$color)->pluck('category')->first();
-
-                    if($colorCategory){
-                        $row[7] = $colorCategory;
-                    }else{
-                        return redirect()->back()->with('error',$indicatorName.' Not Found'); 
-                    }
-                    
-                    $row[8] = auth()->user()->id;
-                    $row[9] = auth()->user()->company_id;
-                }
-
-                $batch->add(new CountryCSVData($header,$data));
+            foreach($groupedData as $countryCode => $singleCountryData){
+                $batch->add(new CountryCSVData($header,$singleCountryData,$countryCode));
             }
         }
 
