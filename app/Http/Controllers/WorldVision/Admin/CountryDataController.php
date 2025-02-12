@@ -206,9 +206,11 @@ class CountryDataController extends Controller
                 }
                 $groupedData[$countryCode][] = $row;
             }
+            $userId = auth()->user()->id;
+            $companyId = auth()->user()->company_id;
 
             foreach($groupedData as $countryCode => $singleCountryData){
-                $batch->add(new CountryCSVData($header,$singleCountryData,$countryCode));
+                $batch->add(new CountryCSVData($header,$singleCountryData,$countryCode,$userId,$companyId));
             }
         }
 

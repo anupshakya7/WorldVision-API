@@ -196,6 +196,85 @@ class SubCountryDataController extends Controller
         return view('worldvision.admin.dashboard.subcountry_data.bulk');
     }
 
+    // public function bulkInsert(Request $request){
+    //     $validatedData = $request->validate([
+    //         'csv_file'=>'required|file|mimes:csv|max:500000'
+    //     ]);
+
+    //     if($request->has('csv_file')){
+    //         $csv = file($request->csv_file);
+    //         $chunks = array_chunk($csv,5000);
+    //         $header = [];
+    //         $batch = Bus::batch([])->dispatch();
+           
+    //         $maxValue = 2147483647;
+    //         $minValue = -2147483648;
+
+    //         foreach($chunks as $key=>$chunk){
+    //             $data = array_map('str_getcsv',$chunk);
+
+    //             if($key == 0){
+    //                 $header = $data[0];
+    //                 unset($data[0]);
+    //                 $newHeader = ['created_by','company_id'];
+    //                 $header = array_merge($header,$newHeader);
+    //             }
+
+    //             $header = array_map(function($value){
+    //                 if($value == 'indicator'){
+    //                     return 'indicator_id';
+    //                 }
+    //                 if($value == 'source'){
+    //                     return 'source_id';
+    //                 }
+    //                 return $value;
+    //             },$header);
+
+    //             foreach($data as &$row){
+    //                 $indicatorName = $row[0];
+    //                 $indicator = Indicator::where('variablename',$indicatorName)->pluck('id')->first();  
+
+    //                 if($indicator){
+    //                     $row[0] = $indicator;
+    //                 }else{
+    //                     return redirect()->back()->with('error',$indicatorName.' Not Found');
+    //                 }
+
+    //                 $bandedValue = $row[4];
+    //                 if($bandedValue > $maxValue || $bandedValue < $minValue){
+    //                     $bandedValue = 0.0;
+    //                     $row[4] = $bandedValue;
+    //                 }
+                    
+
+    //                 //Source
+    //                 $sourceName = $row[7];
+    //                 $source = Source::where('source',$sourceName)->pluck('id')->first();
+
+    //                 if($source){
+    //                     $row[7] = $source;
+    //                 }else{
+    //                     $sourceNew = Source::create([
+    //                         'source'=>$sourceName,
+    //                         'created_by'=>auth()->user()->id,
+    //                         'company_id'=>auth()->user()->company_id
+    //                     ]);
+    //                     $row[7] = $sourceNew->id;
+    //                 }
+
+
+    //                 $row[9] = auth()->user()->id;
+    //                 $row[10] = auth()->user()->company_id;
+    //             }
+
+    //             $batch->add(new SubCountryCSVData($header,$data));
+    //         }
+    //     }
+
+    //     $subcountriesData = SubCountryData::with(['indicator','subcountry','user'])->paginate(10);
+    //     return redirect()->route('admin.sub-country-data.index',compact('subcountriesData'))->with('success','CSV import added on queue. Will update you once done!!!');
+    // }
+
     public function bulkInsert(Request $request){
         $validatedData = $request->validate([
             'csv_file'=>'required|file|mimes:csv|max:500000'
@@ -203,71 +282,32 @@ class SubCountryDataController extends Controller
 
         if($request->has('csv_file')){
             $csv = file($request->csv_file);
-            $chunks = array_chunk($csv,5000);
+            $csvarray = array_map('str_getcsv',$csv);
+
+            //Header Start
             $header = [];
+            $header = $csvarray[0];
+            unset($csvarray[0]);
+            //Header End
+
             $batch = Bus::batch([])->dispatch();
-           
-            $maxValue = 2147483647;
-            $minValue = -2147483648;
+            $groupedData = [];
 
-            foreach($chunks as $key=>$chunk){
-                $data = array_map('str_getcsv',$chunk);
+            //Grouping Data through State
+            foreach($csvarray as $row){
+                $geocode = $row[1];
 
-                if($key == 0){
-                    $header = $data[0];
-                    unset($data[0]);
-                    $newHeader = ['created_by','company_id'];
-                    $header = array_merge($header,$newHeader);
+                if(!isset($groupedData[$geocode])){
+                    $groupedData[$geocode] = [];
                 }
+                $groupedData[$geocode][] = $row;
+            }
 
-                $header = array_map(function($value){
-                    if($value == 'indicator'){
-                        return 'indicator_id';
-                    }
-                    if($value == 'source'){
-                        return 'source_id';
-                    }
-                    return $value;
-                },$header);
+            $userId = auth()->user()->id;
+            $companyId = auth()->user()->company_id;
 
-                foreach($data as &$row){
-                    $indicatorName = $row[0];
-                    $indicator = Indicator::where('variablename',$indicatorName)->pluck('id')->first();  
-
-                    if($indicator){
-                        $row[0] = $indicator;
-                    }else{
-                        return redirect()->back()->with('error',$indicatorName.' Not Found');
-                    }
-
-                    $bandedValue = $row[4];
-                    if($bandedValue > $maxValue || $bandedValue < $minValue){
-                        $bandedValue = 0.0;
-                        $row[4] = $bandedValue;
-                    }
-                    
-
-                    //Source
-                    $sourceName = $row[7];
-                    $source = Source::where('source',$sourceName)->pluck('id')->first();
-
-                    if($source){
-                        $row[7] = $source;
-                    }else{
-                        $sourceNew = Source::create([
-                            'source'=>$sourceName,
-                            'created_by'=>auth()->user()->id,
-                            'company_id'=>auth()->user()->company_id
-                        ]);
-                        $row[7] = $sourceNew->id;
-                    }
-
-
-                    $row[9] = auth()->user()->id;
-                    $row[10] = auth()->user()->company_id;
-                }
-
-                $batch->add(new SubCountryCSVData($header,$data));
+            foreach($groupedData as $geocode=>$singleStateData){
+                $batch->add(new SubCountryCSVData($header,$singleStateData,$geocode,$userId,$companyId));
             }
         }
 

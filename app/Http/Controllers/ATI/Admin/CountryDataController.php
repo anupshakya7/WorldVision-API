@@ -58,61 +58,183 @@ class CountryDataController extends Controller
         ]);
 
         $data_type = $request->type;
+
         $custom_data = [auth()->user()->id, auth()->user()->company_id];
         if ($data_type == 'election') {
             $route = 'admin.ati.elections.index';
             $countriesData = CountryData::with(['country', 'user'])->filterElectionData()->paginate(10);
             $custom_data[2] = 0;   
+            $countryCodeNo = 0;
         } elseif ($data_type == 'disruption') {
             $route = 'admin.ati.disruptions.index';
             $countriesData = CountryData::with(['country', 'user'])->filterHistoricalDisruptionData()->paginate(10);
             $custom_data[2] = 1;
+            $countryCodeNo = 0;
         } elseif ($data_type == 'indicator-score') {
             $route = 'admin.ati.indicator-score.index';
             $countriesData = CountryData::with(['indicator', 'country', 'user'])->filterIndicatorScore()->paginate(10);
             $custom_data[2] = 2;
+            $countryCodeNo = 1;
         }elseif ($data_type == 'voice-people') {
             $route = 'admin.ati.voice-people.index';
             $countriesData = CountryData::with(['indicator', 'country', 'user'])->filterIndicatorScore()->paginate(10);
             $custom_data[2] = 3;
+            $countryCodeNo = 0;
         }elseif ($data_type == 'domain-score') {
             $route = 'admin.ati.domain-score.index';
             $countriesData = CountryData::with(['indicator', 'country', 'user'])->filterIndicatorScore()->paginate(10);
             $custom_data[2] = 4;
+            $countryCodeNo = 1;
         }
         $countriesData = PaginationHelper::addSerialNo($countriesData);
 
         if ($request->has('csv_file')) {
             $csv = file($request->csv_file);
-            $chunks = array_chunk($csv, 500);
+            $csvarray = array_map('str_getcsv',$csv);
+
+            //Header Start
             $header = [];
-            $batch = Bus::batch([])->dispatch();
+            $header = $csvarray[0];
             $custom_header = ['created_by', 'company_id', 'political_context'];
+            $header = array_merge($header,$custom_header);
+            unset($csvarray[0]);
+            //Header End
+            
+            $batch = Bus::batch([])->dispatch();
+            $groupedData = [];
 
-            foreach ($chunks as $key => $chunk) {
+            foreach($csvarray as $row){
+               $countryCode = $row[$countryCodeNo];
 
-                $data = array_map('str_getcsv', $chunk);
+               if(!isset($groupedData[$countryCode])){
+                    $groupedData[$countryCode] = [];
+               }
 
-                if ($key == 0) {
-                    $header = $data[0];
-                    $header = array_merge($header, $custom_header);
-                    unset($data[0]);
-                }
-
-                // Add custom data to each row in $data
-                foreach ($data as &$row) {
-                    if($data_type == 'election'){
-                        if($row[1]==="" ){
-                            $row[1]=null;
-                        }
+               if($data_type == 'election'){
+                    if($row[1]===""){
+                        $row[1]=null;
                     }
-                    // Append custom data values as indexed values
-                    $row = array_merge($row, $custom_data);
                 }
-                $batch->add(new CountryCSVData($header, $data));
+                // Append custom data values as indexed values
+                $row = array_merge($row, $custom_data);
+
+                $groupedData[$countryCode][] = $row;
             }
+
+
+            dd($header);
+            dd($groupedData);
+            
+
+            // foreach ($chunks as $key => $chunk) {
+
+            //     $data = array_map('str_getcsv', $chunk);
+
+            //     if ($key == 0) {
+            //         $header = $data[0];
+            //         $header = array_merge($header, $custom_header);
+            //         unset($data[0]);
+            //     }
+
+            //     // Add custom data to each row in $data
+            //     foreach ($data as &$row) {
+                  
+            //     }
+            //     $batch->add(new CountryCSVData($header, $data));
+            // }
         }
 
         return redirect()->route($route, compact('countriesData'))->with('success', 'CSV import added on queue. Will update you once done!!!');
     }
+
+    // public function bulkInsert(Request $request)
+    // {
+    //     $validatedData = $request->validate([
+    //         'type' => 'required|string',
+    //         'csv_file' => 'required|file|mimes:csv|max:500000'
+    //     ]);
+
+    //     $data_type = $request->type;
+    //     $custom_data = [auth()->user()->id, auth()->user()->company_id];
+    //     if ($data_type == 'election') {
+    //         $route = 'admin.ati.elections.index';
+    //         $countriesData = CountryData::with(['country', 'user'])->filterElectionData()->paginate(10);
+    //         $custom_data[2] = 0;   
+    //         $countryCode = 0;
+    //     } elseif ($data_type == 'disruption') {
+    //         $route = 'admin.ati.disruptions.index';
+    //         $countriesData = CountryData::with(['country', 'user'])->filterHistoricalDisruptionData()->paginate(10);
+    //         $custom_data[2] = 1;
+    //         $countryCode = 0;
+    //     } elseif ($data_type == 'indicator-score') {
+    //         $route = 'admin.ati.indicator-score.index';
+    //         $countriesData = CountryData::with(['indicator', 'country', 'user'])->filterIndicatorScore()->paginate(10);
+    //         $custom_data[2] = 2;
+    //         $countryCode = 1;
+    //     }elseif ($data_type == 'voice-people') {
+    //         $route = 'admin.ati.voice-people.index';
+    //         $countriesData = CountryData::with(['indicator', 'country', 'user'])->filterIndicatorScore()->paginate(10);
+    //         $custom_data[2] = 3;
+    //         $countryCode = 0;
+    //     }elseif ($data_type == 'domain-score') {
+    //         $route = 'admin.ati.domain-score.index';
+    //         $countriesData = CountryData::with(['indicator', 'country', 'user'])->filterIndicatorScore()->paginate(10);
+    //         $custom_data[2] = 4;
+    //         $countryCode = 1;
+    //     }
+    //     $countriesData = PaginationHelper::addSerialNo($countriesData);
+
+    //     if ($request->has('csv_file')) {
+    //         $csv = file($request->csv_file);
+    //         $csvarray = array_map('str_getcsv',$csv);
+
+    //         //Header Start
+    //         $header = [];
+    //         $header = $csvarray[0];
+    //         unset($csvarray[0]);
+    //         //Header End
+            
+    //         $batch = Bus::batch([])->dispatch();
+    //         $groupedData = [];
+
+    //         foreach($csvarray as $row){
+    //            $countryCode = $row[$countryCode];
+
+    //            if(!isset($groupedData[$countryCode])){
+    //                 $groupedData[$countryCode] = [];
+    //            }
+
+    //            $groupedData[$countryCode][] = $row;
+    //         }
+
+            
+
+    //         $custom_header = ['created_by', 'company_id', 'political_context'];
+
+    //         foreach ($chunks as $key => $chunk) {
+
+    //             $data = array_map('str_getcsv', $chunk);
+
+    //             if ($key == 0) {
+    //                 $header = $data[0];
+    //                 $header = array_merge($header, $custom_header);
+    //                 unset($data[0]);
+    //             }
+
+    //             // Add custom data to each row in $data
+    //             foreach ($data as &$row) {
+    //                 if($data_type == 'election'){
+    //                     if($row[1]==="" ){
+    //                         $row[1]=null;
+    //                     }
+    //                 }
+    //                 // Append custom data values as indexed values
+    //                 $row = array_merge($row, $custom_data);
+    //             }
+    //             $batch->add(new CountryCSVData($header, $data));
+    //         }
+    //     }
+
+    //     return redirect()->route($route, compact('countriesData'))->with('success', 'CSV import added on queue. Will update you once done!!!');
+    // }
 }

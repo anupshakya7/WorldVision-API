@@ -25,20 +25,16 @@ class CountryCSVData implements ShouldQueue
     public $data;
     public $errors;
     public $countrycode;
-    public $userId;
-    public $companyId;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($header,$data,$countrycode,$userId,$companyId)
+    public function __construct($header,$data,$countrycode)
     {
         $this->header = $header;
         $this->data = $data;
         $this->countrycode = $countrycode;
-        $this->userId = $userId;
-        $this->companyId = $companyId;
     }
 
     /**
