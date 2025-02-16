@@ -283,12 +283,18 @@ class SubCountryDataController extends Controller
         if($request->has('csv_file')){
             $csv = file($request->csv_file);
             $csvarray = array_map('str_getcsv',$csv);
-
+            
             //Header Start
             $header = [];
             $header = $csvarray[0];
             unset($csvarray[0]);
+            $newHeader = ['created_by','company_id','created_at','updated_at'];
+            $header = array_merge($header,$newHeader);
             //Header End
+        
+            //User and Company Id
+            $userId = auth()->user()->id;
+            $companyId = auth()->user()->company_id;
 
             $batch = Bus::batch([])->dispatch();
             $groupedData = [];
@@ -300,14 +306,16 @@ class SubCountryDataController extends Controller
                 if(!isset($groupedData[$geocode])){
                     $groupedData[$geocode] = [];
                 }
+                $row[9] = $userId;
+                $row[10] = $companyId;
+                $row[11] = now()->format('Y-m-d H:i:s'); 
+                $row[12] = now()->format('Y-m-d H:i:s');
+
                 $groupedData[$geocode][] = $row;
             }
 
-            $userId = auth()->user()->id;
-            $companyId = auth()->user()->company_id;
-
             foreach($groupedData as $geocode=>$singleStateData){
-                $batch->add(new SubCountryCSVData($header,$singleStateData,$geocode,$userId,$companyId));
+                $batch->add(new SubCountryCSVData($header,$singleStateData,$geocode));
             }
         }
 

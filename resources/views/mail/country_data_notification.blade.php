@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Country Data Error Notication</title>
+    <title>Country Data Notication</title>
 </head>
 <body>
-    <h1>Error Notification</h1>
+    <h1>Notification</h1>
     <div class="error-details">
         <p><strong>Country Code: {{$countryCode}}</strong></p>
     </div>
@@ -21,7 +21,7 @@
 
        $errors = array_values($errors);
     ?>
-    <p><strong>Error Message: </strong></p>
+    <p><strong>Message: </strong></p>
     <ul>
         @foreach($errors as $error)
             <ol>{{$error}}</ol>
