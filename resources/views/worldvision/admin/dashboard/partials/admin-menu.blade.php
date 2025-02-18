@@ -38,6 +38,26 @@
                     </a>
                 </li> <!-- end Dashboard Menu -->
 
+                {{-- Start Company Management --}}
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarcompanies" data-bs-toggle="collapse" role="button"
+                        aria-expanded="false" aria-controls="sidebarcompanies">
+                        <i class=" ri-line-chart-line"></i>
+                        <span data-key="t-country">{{ 'Company Management' }}</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarcompanies">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{{route('admin.company.index')}}" class="nav-link">{{ 'List' }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{route('admin.company.create')}}" class="nav-link">{{ 'Create' }}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {{-- End Indicator Management --}}
+
                 {{-- Start User Management --}}
                 @role('admin')
                 <li class="nav-item">

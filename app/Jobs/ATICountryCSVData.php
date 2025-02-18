@@ -17,14 +17,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class CountryCSVData implements ShouldQueue
+class ATICountryCSVData implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,Batchable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $header;
     public $data;
     public $errors;
     public $countrycode;
+    public $batchId;
+
+
     /**
      * Create a new job instance.
      *
@@ -48,7 +51,7 @@ class CountryCSVData implements ShouldQueue
             DB::beginTransaction(); //Start the transaction
             
             //World Vision
-            $this->countryWorldVisionFormatting($this->header,$this->data);
+            $this->dataformatting($this->header,$this->data);
 
             //Check for errors
             if(!empty($this->errors)){
@@ -80,22 +83,27 @@ class CountryCSVData implements ShouldQueue
             Mail::to('anupshk7@gmail.com')
                 ->send(new CountryDataErrorNotification($this->countrycode,$e->getMessage()));
         }
-       
+    }
+    
+    public function withBatchId($batchId){
+        $this->batchId = $batchId;
+        return $this;
     }
 
     //Data Formatting
-    public function countryWorldVisionFormatting($header,$data){
-        $newHeader = ['country_cat','created_by','company_id','created_at','updated_at'];
-        
-        //Header Formatting
-        $this->header = array_merge($header,$newHeader);
-        
+    public function dataformatting($header,$data){
         $this->header = array_map(function($value){
             if($value == 'indicator'){
                 return 'indicator_id';
             }
             return $value;
         },$this->header);
+
+        //Find Indicator in Header
+        $indicatorIndex = array_search("indicator",$header);
+
+        //Find Year in Header
+        $yearIndex = array_search("year",$header);
 
         //Error Array
         $this->errors = [];
@@ -105,36 +113,23 @@ class CountryCSVData implements ShouldQueue
             //Country Code
             $countrycode = $this->countrycode;
 
-            //Year
-            $year = $row[2];
-
             //Indicator
-            $indicatorName = $row[0];
-            
-            $indicator = Indicator::where('variablename',$indicatorName)->pluck('id')->first();
+            $indicatorName = $indicatorIndex !== false ? $row[$indicatorIndex]:'';
+            //Year
+            $year = $yearIndex !== false ? $row[$yearIndex]:'';
 
-            if($indicator){
-                $row[0] = $indicator;
-            }else{
-                $row[0] = null;
-                $this->errors[] = 'Indicator does not exists with the name '.$indicatorName.' for '.$countrycode.' ('.$indicatorName.' ,'.$year.')'; 
+            if($indicatorName !== ''){
+                $indicator = Indicator::where('variablename',$indicatorName)->pluck('id')->first();
+
+                if($indicator){
+                    $row[$indicatorIndex] = $indicator;
+                }else{
+                    $row[$indicatorIndex] = null;
+                    $year = $year !== '' ? ' ,'.$year :'';
+                    $this->errors[] = 'Indicator does not exists with the name '.$indicatorName.' for '.$countrycode.' ('.$indicatorName.''.$year.')'; 
+                }
+
             }
-
-            //Color
-            $color = $row[5];
-            $colorCategory = CategoryColor::where('subcountry_leg_col',$color)->pluck('category')->first();
-
-            if($colorCategory){
-                $row[7] = $colorCategory;
-            }else{
-                $row[7] = null;
-                $this->errors[] = 'Color Category does not exits with the code '.$color.' for '.$countrycode.' ('.$indicatorName.' ,'.$year.')';
-            }
-
-            $row[8] = $this->userId;
-            $row[9] = $this->companyId;
-            $row[10] = now()->format('Y-m-d H:i:s');
-            $row[11] = now()->format('Y-m-d H:i:s');
         }
 
         $this->data = $data;

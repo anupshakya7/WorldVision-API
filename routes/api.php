@@ -60,7 +60,7 @@ Route::middleware('api.token:worldvision')->group(function(){
     Route::get('/project-piechart',[APIAllAPIController::class,'projectPieChart']);
 });
 
-Route::middleware('api.token:ati')->group(function(){
+Route::group([],function(){
     //ATI API
     //Check Voice of People
     Route::get('/check-voice-people',[VoiceOfPeopleController::class,'checkCountryYearWise'])->name('check.voice.people');

@@ -3,6 +3,7 @@
 use App\Http\Controllers\WorldVision\Admin\Authorize\PermissionController;
 use App\Http\Controllers\WorldVision\Admin\Authorize\RoleController;
 use App\Http\Controllers\WorldVision\Admin\CategoryColorController;
+use App\Http\Controllers\WorldVision\Admin\CompanyController;
 use App\Http\Controllers\WorldVision\Admin\CountryController;
 use App\Http\Controllers\WorldVision\Admin\CountryDataController;
 use App\Http\Controllers\WorldVision\Admin\IndexController;
@@ -19,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth','check_company'])->group(function () {
     //Dashboard
     Route::get('/', [IndexController::class,'dashboard'])->name('home');
+
+    //Company Management
+    Route::resource('company', CompanyController::class);
 
     //User Management
     //User

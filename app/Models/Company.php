@@ -10,7 +10,8 @@ class Company extends Model
     use HasFactory;
 
     protected $fillable = [
-        "name"
+        "name",
+        "logo"
     ];
 
     public function user(){

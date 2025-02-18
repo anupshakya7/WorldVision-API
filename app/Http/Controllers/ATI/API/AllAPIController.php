@@ -75,6 +75,7 @@ class AllAPIController extends Controller
                     $score= CountryData::where('indicator_id',$domain->id)->where('countrycode',$request->countrycode)->where('year',$i)->pluck('banded')->first();
                     $domainTrendResult10Year[$i] = $score ? round($score,2):0;
                 }
+                return $domain;
                 $domainResult = CountryData::select('countrycode','year','banded as score')->where('indicator_id',$domain->id)->where('countrycode',$request->countrycode)->where('year',$year)->latest()->first();
                 $firstYearResult = CountryData::select('countrycode','year','banded as score')->where('indicator_id',$domain->id)->where('countrycode',$request->countrycode)->where('year',2013)->latest()->first();
 
@@ -97,6 +98,16 @@ class AllAPIController extends Controller
             //Domain Data
 
             //Voice of People Data
+            $indicatorForVoiceOfPeoples = ["The Judicial System"=>"Trust Courts","Politics"=>"Unequal Treatment Under the Law","Elections"=>"Free and Fair Elections"];
+            $voiceOfPeoples = [];
+
+            foreach($indicatorForVoiceOfPeoples as $key=>$indicatorForVoiceOfPeople){
+                return $indicatorForVoiceOfPeople;
+                $singleIndicatorVoiceOfPeople = Indicator::where('variablename',$indicatorForVoiceOfPeople)->first();
+                return $singleIndicatorVoiceOfPeople;
+                $voiceOfPeoples[$key] = $singleIndicatorVoiceOfPeople;
+            }
+
             $voiceOfPeoples = ["The Judicial System"=>106,"Politics"=>105,"Elections"=>94];
             $voiceOfPeopleResult = [];
 
